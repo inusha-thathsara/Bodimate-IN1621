@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
+import { useUserStore } from '@/store/useUserStore'
 
 export function RegisterForm() {
     const router = useRouter()
@@ -16,6 +17,7 @@ export function RegisterForm() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const supabase = createClient()
+    const { setUser } = useUserStore()
 
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -47,15 +49,19 @@ export function RegisterForm() {
             // Since we disable email confirmation to make it easier for testing,
             // manually insert user data into our public users table
             if (data.user) {
-                const { error: insertError } = await supabase.from('users').insert({
+                const newUser = {
                     id: data.user.id,
                     email: data.user.email!,
                     full_name: fullName,
                     role: role,
-                })
+                };
+
+                const { error: insertError } = await supabase.from('users').insert(newUser)
 
                 if (insertError) {
                     console.error('Error inserting user data', insertError)
+                } else {
+                    setUser(newUser as any)
                 }
             }
 

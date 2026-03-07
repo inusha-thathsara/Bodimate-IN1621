@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { PlusCircle, MoreVertical, Edit2, Trash2 } from 'lucide-react'
+import { PlusCircle, MoreVertical, Edit2, Trash2, Home } from 'lucide-react'
 import { getBoardingsByOwner, deleteBoarding } from '@/lib/api'
 import { useUserStore } from '@/store/useUserStore'
 import { Button } from '@/components/ui/button'
