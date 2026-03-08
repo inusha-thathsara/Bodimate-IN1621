@@ -39,7 +39,7 @@ export function Navbar() {
                         <div className="flex items-center mr-4">
                             <div className="flex flex-col">
                                 <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">Location</span>
-                                <span className="text-sm text-foreground font-medium">Kelaniya</span>
+                                <span className="text-sm text-foreground font-medium">Moratuwa</span>
                             </div>
                         </div>
                         <div className="w-[1px] h-8 bg-border mx-2"></div>

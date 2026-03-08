@@ -52,7 +52,7 @@ export default function BoardingsFeed() {
                             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">LOCATION</h3>
                             <div className="relative">
                                 <select className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 pr-10 font-medium outline-none">
-                                    <option>Near University of Kelaniya</option>
+                                    <option>Near University of Moratuwa</option>
                                     <option>Dalugama</option>
                                     <option>Kiribathgoda</option>
                                 </select>

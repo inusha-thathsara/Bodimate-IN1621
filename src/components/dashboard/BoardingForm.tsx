@@ -66,7 +66,7 @@ export function BoardingForm() {
             <div className="space-y-6">
                 <div className="space-y-2">
                     <Label htmlFor="title" className="text-gray-900 font-bold">Property Title</Label>
-                    <Input id="title" name="title" placeholder="e.g. Modern Annex near Kelaniya UNI" required className="h-12 bg-gray-50 border-gray-200" />
+                    <Input id="title" name="title" placeholder="e.g. Modern Annex near Moratuwa UNI" required className="h-12 bg-gray-50 border-gray-200" />
                 </div>
 
                 <div className="space-y-2">
@@ -88,7 +88,7 @@ export function BoardingForm() {
 
                     <div className="space-y-2">
                         <Label htmlFor="address" className="text-gray-900 font-bold">Address / Location</Label>
-                        <Input id="address" name="address" placeholder="e.g. 123 Main St, Kelaniya" required className="h-12 bg-gray-50 border-gray-200" />
+                        <Input id="address" name="address" placeholder="e.g. 123 Main St, Moratuwa" required className="h-12 bg-gray-50 border-gray-200" />
                     </div>
                 </div>
 
