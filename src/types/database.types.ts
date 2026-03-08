@@ -128,6 +128,81 @@ export interface Database {
                     }
                 ]
             }
+            requests: {
+                Row: {
+                    id: string
+                    boarding_id: string
+                    student_id: string
+                    status: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    boarding_id: string
+                    student_id: string
+                    status?: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    boarding_id?: string
+                    student_id?: string
+                    status?: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "requests_boarding_id_fkey"
+                        columns: ["boarding_id"]
+                        isOneToOne: false
+                        referencedRelation: "boardings"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "requests_student_id_fkey"
+                        columns: ["student_id"]
+                        isOneToOne: false
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            saved_boardings: {
+                Row: {
+                    id: string
+                    boarding_id: string
+                    student_id: string
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    boarding_id: string
+                    student_id: string
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    boarding_id?: string
+                    student_id?: string
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "saved_boardings_boarding_id_fkey"
+                        columns: ["boarding_id"]
+                        isOneToOne: false
+                        referencedRelation: "boardings"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "saved_boardings_student_id_fkey"
+                        columns: ["student_id"]
+                        isOneToOne: false
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
         }
         Views: {
             [_ in never]: never

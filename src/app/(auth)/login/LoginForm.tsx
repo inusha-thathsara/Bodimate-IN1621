@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
 
@@ -12,18 +13,35 @@ export function LoginForm() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    // Controlled inputs for Email, Password, and Remember Me
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [rememberMe, setRememberMe] = useState(false)
     const supabase = createClient()
+
+    useEffect(() => {
+        // Load saved email if 'Remember Me' was used previously
+        const savedEmail = localStorage.getItem('bodimate_remembered_email')
+        if (savedEmail) {
+            setEmail(savedEmail)
+            setRememberMe(true)
+        }
+    }, [])
 
     async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
         setIsLoading(true)
         setError(null)
 
-        const formData = new FormData(event.currentTarget)
-        const email = formData.get('email') as string
-        const password = formData.get('password') as string
-
         try {
+            // Handle Remember Me persistence
+            if (rememberMe) {
+                localStorage.setItem('bodimate_remembered_email', email)
+            } else {
+                localStorage.removeItem('bodimate_remembered_email')
+            }
+
             const { error: signInError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
@@ -51,14 +69,46 @@ export function LoginForm() {
             <div className="space-y-4">
                 <div className="space-y-1.5">
                     <Label htmlFor="email" className="text-gray-700 font-medium">Email address</Label>
-                    <Input id="email" name="email" type="email" placeholder="john@example.com" required className="h-12 bg-gray-50 border-gray-200 focus-visible:ring-primary" />
+                    <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="john@example.com"
+                        required
+                        className="h-12 bg-gray-50 border-gray-200 focus-visible:ring-primary"
+                    />
                 </div>
                 <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
                         <a href="#" className="text-sm font-semibold text-primary hover:underline">Forgot password?</a>
                     </div>
-                    <Input id="password" name="password" type="password" required className="h-12 bg-gray-50 border-gray-200 focus-visible:ring-primary" />
+                    <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="h-12 bg-gray-50 border-gray-200 focus-visible:ring-primary"
+                    />
+                </div>
+
+                <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox
+                        id="remember"
+                        checked={rememberMe}
+                        onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                        className="data-[state=checked]:bg-[#0A1435] data-[state=checked]:border-[#0A1435]"
+                    />
+                    <Label
+                        htmlFor="remember"
+                        className="text-sm font-medium leading-none cursor-pointer text-gray-700"
+                    >
+                        Remember me
+                    </Label>
                 </div>
             </div>
 

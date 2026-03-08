@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { MapPin, Star, Heart, Share2, ShieldCheck, Check } from 'lucide-react'
-import { getBoardingById, getReviewsByBoarding, createReview } from '@/lib/api'
+import { getBoardingById, getReviewsByBoarding, createReview, createRequest, toggleSavedBoarding, checkIsSaved, checkHasRequested } from '@/lib/api'
 import { useUserStore } from '@/store/useUserStore'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +23,12 @@ export default function BoardingDetailsPage() {
     const [comment, setComment] = useState('')
     const [isSubmittingReview, setIsSubmittingReview] = useState(false)
 
+    // Interaction state
+    const [isSaved, setIsSaved] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+    const [hasRequested, setHasRequested] = useState(false)
+    const [isRequesting, setIsRequesting] = useState(false)
+
     useEffect(() => {
         async function loadData() {
             if (!params.id) return
@@ -33,6 +39,17 @@ export default function BoardingDetailsPage() {
                 ])
                 setBoarding(boardingData)
                 setReviews(reviewsData)
+
+                // Load user specific interactions if student
+                if (user?.id && user.role === 'STUDENT') {
+                    const [savedResult, requestedResult] = await Promise.all([
+                        checkIsSaved(boardingData.id, user.id),
+                        checkHasRequested(boardingData.id, user.id)
+                    ])
+                    setIsSaved(savedResult)
+                    setHasRequested(requestedResult)
+                }
+
             } catch (error) {
                 console.error('Error loading data:', error)
             } finally {
@@ -40,7 +57,7 @@ export default function BoardingDetailsPage() {
             }
         }
         loadData()
-    }, [params.id])
+    }, [params.id, user?.id, user?.role])
 
     async function handleReviewSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -65,6 +82,38 @@ export default function BoardingDetailsPage() {
             alert('Failed to submit review.')
         } finally {
             setIsSubmittingReview(false)
+        }
+    }
+
+    async function handleToggleSave() {
+        if (!user) return router.push('/login')
+        if (user.role !== 'STUDENT' || !boarding) return
+
+        setIsSaving(true)
+        try {
+            const result = await toggleSavedBoarding(boarding.id, user.id)
+            setIsSaved(result.action === 'saved')
+        } catch (error) {
+            console.error('Error toggling save:', error)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    async function handleRequestBook() {
+        if (!user) return router.push('/login')
+        if (user.role !== 'STUDENT' || !boarding || hasRequested) return
+
+        setIsRequesting(true)
+        try {
+            await createRequest(boarding.id, user.id)
+            setHasRequested(true)
+            alert('Request sent successfully! The owner will be notified.')
+        } catch (error) {
+            console.error('Error creating request:', error)
+            alert('Failed to send request. Please try again.')
+        } finally {
+            setIsRequesting(false)
         }
     }
 
@@ -258,12 +307,27 @@ export default function BoardingDetailsPage() {
                                 </div>
                             </div>
 
-                            <Button className="w-full h-14 text-lg font-bold rounded-2xl bg-[#0A1435] hover:bg-[#0A1435]/90 text-white shadow-lg shadow-blue-900/20 mb-3" disabled={!boarding.is_available}>
-                                Contact Owner
-                            </Button>
-                            <Button variant="outline" className="w-full h-14 text-base font-bold rounded-2xl border-2">
-                                Save to Favorites
-                            </Button>
+                            {user?.role === 'OWNER' ? (
+                                <p className="text-gray-500 text-sm text-center font-medium mt-4">You cannot book or save properties as an owner.</p>
+                            ) : (
+                                <>
+                                    <Button
+                                        onClick={handleRequestBook}
+                                        disabled={!boarding.is_available || isRequesting || hasRequested}
+                                        className={`w-full h-14 text-lg font-bold rounded-2xl shadow-lg shadow-blue-900/20 mb-3 transition-all ${hasRequested ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-[#0A1435] hover:bg-[#0A1435]/90 text-white'}`}
+                                    >
+                                        {isRequesting ? 'Sending...' : hasRequested ? 'Request Sent' : 'Request to Book'}
+                                    </Button>
+                                    <Button
+                                        variant={isSaved ? "default" : "outline"}
+                                        onClick={handleToggleSave}
+                                        disabled={isSaving}
+                                        className={`w-full h-14 text-base font-bold rounded-2xl border-2 transition-all ${isSaved ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700' : ''}`}
+                                    >
+                                        {isSaving ? 'Updating...' : isSaved ? 'Saved to Favorites' : 'Save to Favorites'}
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     </div>
 
