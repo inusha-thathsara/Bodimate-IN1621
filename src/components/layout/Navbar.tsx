@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Building2, Search, Bell, Menu, LogOut, LayoutDashboard } from 'lucide-react'
+import { Building2, Search, Bell, Menu, LogOut, LayoutDashboard, UserCog } from 'lucide-react'
 import { useUserStore } from '@/store/useUserStore'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -87,16 +87,23 @@ export function Navbar() {
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Link href="/boardings" className="cursor-pointer">Browse Boardings</Link>
+                                        <Link href={user.role === 'OWNER' ? '/dashboard' : '/student/dashboard'} className="cursor-pointer">
+                                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                                            <span>Dashboard</span>
+                                        </Link>
                                     </DropdownMenuItem>
-                                    {user.role === 'OWNER' && (
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/dashboard" className="cursor-pointer">
-                                                <LayoutDashboard className="mr-2 h-4 w-4" />
-                                                <span>Owner Dashboard</span>
-                                            </Link>
-                                        </DropdownMenuItem>
-                                    )}
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/profile" className="cursor-pointer">
+                                            <UserCog className="mr-2 h-4 w-4" />
+                                            <span>Edit Profile</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/boardings" className="cursor-pointer">
+                                            <Search className="mr-2 h-4 w-4" />
+                                            <span>Browse Boardings</span>
+                                        </Link>
+                                    </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
                                         <LogOut className="mr-2 h-4 w-4" />

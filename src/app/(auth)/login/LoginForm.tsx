@@ -49,7 +49,24 @@ export function LoginForm() {
 
             if (signInError) throw signInError
 
-            router.push('/')
+            const { data: { user } } = await supabase.auth.getUser()
+
+            // Fetch user role to determine where to redirect
+            const { data: userData, error: roleError } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', user?.id || '')
+                .single()
+
+            if (roleError) console.error("Could not fetch user role during login redirect", roleError)
+
+            if (userData?.role === 'OWNER') {
+                router.push('/dashboard')
+            } else if (userData?.role === 'STUDENT') {
+                router.push('/student/dashboard')
+            } else {
+                router.push('/')
+            }
             router.refresh()
         } catch (err: any) {
             setError(err.message || 'An error occurred during sign in.')
@@ -61,7 +78,7 @@ export function LoginForm() {
     return (
         <form onSubmit={onSubmit} className="space-y-6">
             {error && (
-                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 font-medium">
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 font-medium break-words">
                     {error}
                 </div>
             )}

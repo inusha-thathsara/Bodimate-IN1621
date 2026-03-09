@@ -17,6 +17,8 @@ export default function BoardingsFeed() {
     const [boardings, setBoardings] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [priceRange, setPriceRange] = useState([5000, 25000])
+    const [currentPage, setCurrentPage] = useState(1)
+    const ITEMS_PER_PAGE = 6
 
     useEffect(() => {
         const fetchBoardings = async () => {
@@ -156,12 +158,15 @@ export default function BoardingsFeed() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {boardings.map((boarding) => {
+                            {boardings.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((boarding) => {
                                 // Transform DB structure back to BoardingCard format
                                 const tags = []
                                 if (boarding.has_wifi) tags.push('WiFi')
                                 if (boarding.has_ac) tags.push('AC')
                                 if (boarding.attached_bathroom) tags.push('Attached Bath')
+                                if (boarding.has_kitchen) tags.push('Kitchen')
+                                if (boarding.has_balcony) tags.push('Balcony')
+                                if (boarding.has_laundry) tags.push('Laundry')
 
                                 // Fallback dummy styling since we don't have this in schema yet
                                 const badgeText = boarding.price > 18000 ? 'PREMIUM' : ''
@@ -172,13 +177,15 @@ export default function BoardingsFeed() {
                                             id={boarding.id}
                                             title={boarding.title}
                                             location={boarding.address.split(',')[0]} // Simple parsing for the location tag
-                                            distanceInfo="0.5KM AWAY" // Mock distance for DB rows
+                                            distanceInfo={boarding.distance_university || "500m to Uni"}
                                             price={boarding.price}
                                             rating={4.5} // Mock rating until we implement actual aggregates
                                             reviewsCount={0}
-                                            imageUrl={boarding.image_url || 'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&q=80&w=600'}
+                                            imageUrl={boarding.image_urls?.[0] || boarding.image_url || 'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&q=80&w=600'}
                                             tags={tags.length > 0 ? tags : ['No specific amenities']}
                                             badgeText={badgeText}
+                                            numberOfBeds={boarding.number_of_beds}
+                                            rentIncludesBills={boarding.rent_includes_bills}
                                         />
                                     </Link>
                                 )
@@ -186,28 +193,39 @@ export default function BoardingsFeed() {
                         </div>
                     )}
 
-                    {/* Pagination Placeholder */}
-                    <div className="flex justify-center items-center gap-2 mt-12 mb-8">
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors bg-white shadow-sm font-medium">
-                            &lsaquo;
-                        </button>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white font-bold shadow-md">
-                            1
-                        </button>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold shadow-sm transition-colors">
-                            2
-                        </button>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold shadow-sm transition-colors">
-                            3
-                        </button>
-                        <span className="px-2 text-gray-400 font-bold">...</span>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold shadow-sm transition-colors">
-                            8
-                        </button>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors bg-white shadow-sm font-medium">
-                            &rsaquo;
-                        </button>
-                    </div>
+                    {/* Dynamic Pagination */}
+                    {boardings.length > ITEMS_PER_PAGE && (
+                        <div className="flex justify-center items-center gap-2 mt-12 mb-8">
+                            <button
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                                className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white shadow-sm font-medium"
+                            >
+                                &lsaquo;
+                            </button>
+
+                            {Array.from({ length: Math.ceil(boardings.length / ITEMS_PER_PAGE) }).map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setCurrentPage(i + 1)}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full font-bold shadow-sm transition-colors ${currentPage === i + 1
+                                        ? 'bg-primary text-white shadow-md'
+                                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+
+                            <button
+                                onClick={() => setCurrentPage(p => Math.min(Math.ceil(boardings.length / ITEMS_PER_PAGE), p + 1))}
+                                disabled={currentPage === Math.ceil(boardings.length / ITEMS_PER_PAGE)}
+                                className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white shadow-sm font-medium"
+                            >
+                                &rsaquo;
+                            </button>
+                        </div>
+                    )}
 
                 </div>
             </div>

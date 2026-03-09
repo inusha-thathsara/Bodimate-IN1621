@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useUserStore } from '@/store/useUserStore'
-import { LayoutDashboard, PlusCircle, Home, Settings } from 'lucide-react'
+import { LayoutDashboard, PlusCircle, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
@@ -13,6 +13,7 @@ export default function DashboardLayout({
     children: React.ReactNode
 }) {
     const router = useRouter()
+    const pathname = usePathname()
     const { user, isLoading } = useUserStore()
 
     useEffect(() => {
@@ -27,6 +28,33 @@ export default function DashboardLayout({
         return <div className="flex-1 flex items-center justify-center min-h-[500px]">Loading dashboard...</div>
     }
 
+    const navItems = [
+        {
+            label: 'My Listings',
+            href: '/dashboard',
+            icon: LayoutDashboard,
+            exact: true
+        },
+        {
+            label: 'Add New Boarding',
+            href: '/dashboard/boardings/new',
+            icon: PlusCircle,
+        }
+    ]
+
+    const accountItems = [
+        {
+            label: 'Settings',
+            href: '/profile',
+            icon: Settings,
+        }
+    ]
+
+    const isActive = (path: string, exact = false) => {
+        if (exact) return pathname === path
+        return pathname.startsWith(path)
+    }
+
     return (
         <div className="flex-1 flex max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-8">
             {/* Sidebar */}
@@ -36,23 +64,43 @@ export default function DashboardLayout({
                         <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Owner Portal</h2>
                     </div>
                     <nav className="space-y-2">
-                        <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/5 text-primary font-bold">
-                            <LayoutDashboard className="h-5 w-5" />
-                            My Listings
-                        </Link>
-                        <Link href="/dashboard/boardings/new" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium transition-colors">
-                            <PlusCircle className="h-5 w-5" />
-                            Add New Boarding
-                        </Link>
+                        {navItems.map((item) => {
+                            const active = isActive(item.href, item.exact)
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${active
+                                            ? 'bg-primary/10 text-primary font-bold shadow-sm'
+                                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium'
+                                        }`}
+                                >
+                                    <item.icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
+                                    {item.label}
+                                </Link>
+                            )
+                        })}
                     </nav>
 
                     <div className="mt-8 pt-8 border-t border-gray-100 px-4">
                         <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Account</h2>
                         <nav className="space-y-2">
-                            <Link href="#" className="flex items-center gap-3 py-2 text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                                <Settings className="h-5 w-5" />
-                                Settings
-                            </Link>
+                            {accountItems.map((item) => {
+                                const active = isActive(item.href)
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={`flex items-center gap-3 py-2 transition-all duration-200 ${active
+                                                ? 'text-primary font-bold'
+                                                : 'text-gray-500 hover:text-gray-900 font-medium'
+                                            }`}
+                                    >
+                                        <item.icon className="h-5 w-5" />
+                                        {item.label}
+                                    </Link>
+                                )
+                            })}
                         </nav>
                     </div>
                 </div>
@@ -60,16 +108,19 @@ export default function DashboardLayout({
 
             {/* Mobile Nav Header */}
             <div className="lg:hidden w-full flex overflow-x-auto gap-2 pb-4 mb-4 border-b">
-                <Link href="/dashboard">
-                    <Button variant="secondary" className="bg-primary/5 text-primary">
-                        My Listings
-                    </Button>
-                </Link>
-                <Link href="/dashboard/boardings/new">
-                    <Button variant="outline">
-                        Add New
-                    </Button>
-                </Link>
+                {navItems.map((item) => {
+                    const active = isActive(item.href, item.exact)
+                    return (
+                        <Link key={item.href} href={item.href}>
+                            <Button
+                                variant={active ? "secondary" : "outline"}
+                                className={active ? "bg-primary/10 text-primary border-none font-bold" : "text-gray-600 border-gray-200 font-medium"}
+                            >
+                                {item.label}
+                            </Button>
+                        </Link>
+                    )
+                })}
             </div>
 
             {/* Main Content */}
@@ -79,3 +130,4 @@ export default function DashboardLayout({
         </div>
     )
 }
+

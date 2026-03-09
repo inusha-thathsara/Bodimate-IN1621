@@ -126,9 +126,20 @@ export default function BoardingDetailsPage() {
 
     return (
         <div className="bg-gray-50 min-h-screen pb-24">
-            {/* Top Gallery Header (Mock) */}
-            <div className="w-full h-[400px] md:h-[500px] relative bg-gray-900 overflow-hidden">
-                {boarding.image_url ? (
+            {/* Top Gallery Header (Multiple Images) */}
+            <div className="w-full h-[300px] md:h-[450px] relative bg-gray-900 overflow-hidden">
+                {boarding.image_urls && boarding.image_urls.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 h-full w-full gap-1">
+                        <div className="relative h-full col-span-1 md:col-span-2 row-span-2 cursor-pointer hover:opacity-95 transition-opacity">
+                            <Image src={boarding.image_urls[0]} alt="Primary View" fill className="object-cover" />
+                        </div>
+                        {boarding.image_urls.slice(1, 5).map((url: string, index: number) => (
+                            <div key={index} className="relative h-full hidden md:block cursor-pointer hover:opacity-95 transition-opacity">
+                                <Image src={url} alt={`Property view ${index + 2}`} fill className="object-cover" />
+                            </div>
+                        ))}
+                    </div>
+                ) : boarding.image_url ? (
                     <Image src={boarding.image_url} alt={boarding.title} fill className="object-cover opacity-80" />
                 ) : (
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0A1435]"></div>
@@ -167,8 +178,14 @@ export default function BoardingDetailsPage() {
                                     <MapPin className="h-4 w-4 text-primary" />
                                     {boarding.address}
                                 </div>
+                                {boarding.number_of_beds && (
+                                    <div className="flex items-center gap-1.5 text-gray-700 sm:border-l sm:pl-6 border-gray-200">
+                                        <span className="font-bold">{boarding.number_of_beds}</span>
+                                        {boarding.number_of_beds === 1 ? 'Bed' : 'Beds'}
+                                    </div>
+                                )}
                                 {avgRating > 0 && (
-                                    <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-1.5 sm:border-l sm:pl-6 border-gray-200">
                                         <Star className="h-4 w-4 text-[#F2994A] fill-current" />
                                         <span className="text-gray-900 font-bold">{avgRating.toFixed(1)}</span>
                                         <span>({reviews.length} reviews)</span>
@@ -187,6 +204,26 @@ export default function BoardingDetailsPage() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Distances */}
+                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-6">
+                            <div className="flex-1">
+                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Distance to University</h3>
+                                <p className="text-xl font-bold text-[#0A1435]">{boarding.distance_university || 'Not specified'}</p>
+                            </div>
+                            {boarding.distance_supermarket && (
+                                <div className="flex-1 sm:border-l sm:pl-6 border-gray-100">
+                                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">To Supermarket</h3>
+                                    <p className="text-xl font-bold text-[#0A1435]">{boarding.distance_supermarket}</p>
+                                </div>
+                            )}
+                            {boarding.distance_town && (
+                                <div className="flex-1 sm:border-l sm:pl-6 border-gray-100">
+                                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">To Town</h3>
+                                    <p className="text-xl font-bold text-[#0A1435]">{boarding.distance_town}</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Description */}
@@ -219,8 +256,42 @@ export default function BoardingDetailsPage() {
                                     </div>
                                     Attached Bathroom
                                 </div>
+                                {boarding.has_kitchen !== undefined && (
+                                    <div className="flex items-center gap-3 font-medium text-gray-700">
+                                        <div className={`flex items-center justify-center h-6 w-6 rounded-full ${boarding.has_kitchen ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                                            {boarding.has_kitchen ? <Check className="h-3 w-3" /> : <div className="h-1 w-1 rounded-full bg-current"></div>}
+                                        </div>
+                                        Kitchen area
+                                    </div>
+                                )}
+                                {boarding.has_balcony !== undefined && (
+                                    <div className="flex items-center gap-3 font-medium text-gray-700">
+                                        <div className={`flex items-center justify-center h-6 w-6 rounded-full ${boarding.has_balcony ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                                            {boarding.has_balcony ? <Check className="h-3 w-3" /> : <div className="h-1 w-1 rounded-full bg-current"></div>}
+                                        </div>
+                                        Balcony access
+                                    </div>
+                                )}
+                                {boarding.has_laundry !== undefined && (
+                                    <div className="flex items-center gap-3 font-medium text-gray-700">
+                                        <div className={`flex items-center justify-center h-6 w-6 rounded-full ${boarding.has_laundry ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                                            {boarding.has_laundry ? <Check className="h-3 w-3" /> : <div className="h-1 w-1 rounded-full bg-current"></div>}
+                                        </div>
+                                        Laundry facilities
+                                    </div>
+                                )}
                             </div>
                         </div>
+
+                        {/* Rules */}
+                        {boarding.rules && (
+                            <div className="bg-[#FFF5EB] rounded-3xl p-8 shadow-sm border border-orange-100">
+                                <h2 className="text-xl font-bold text-[#0A1435] mb-4">House Rules</h2>
+                                <div className="text-gray-700 font-medium whitespace-pre-wrap leading-relaxed">
+                                    {boarding.rules}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Reviews Section */}
                         <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
@@ -295,9 +366,14 @@ export default function BoardingDetailsPage() {
                     {/* Right Sidebar Widget (Sticky Pricing Info) */}
                     <div className="w-full lg:w-[360px] flex-shrink-0">
                         <div className="bg-white rounded-[24px] p-6 shadow-xl shadow-blue-900/5 border border-gray-100 lg:sticky lg:top-24">
-                            <div className="mb-6">
+                            <div className="mb-6 border-b pb-6 border-gray-100">
                                 <span className="text-[32px] font-extrabold text-[#0A1435]">Rs {boarding.price.toLocaleString()}</span>
                                 <span className="text-gray-500 font-medium text-lg"> / month</span>
+                                {boarding.rent_includes_bills && (
+                                    <div className="mt-3 flex items-center bg-green-50 text-green-700 px-3 py-1.5 w-fit rounded-full text-xs font-bold border border-green-200">
+                                        <Check className="w-3.5 h-3.5 mr-1.5" /> Utilities Included (Water/Electricity)
+                                    </div>
+                                )}
                             </div>
 
                             <div className="p-4 bg-gray-50 rounded-2xl mb-6 border border-gray-100">
@@ -306,6 +382,16 @@ export default function BoardingDetailsPage() {
                                     <p className="text-gray-600 font-medium">Protected against fraud. Only pay when you visit the property and sign the agreement.</p>
                                 </div>
                             </div>
+
+                            {boarding.google_maps_url && (
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-12 text-sm font-bold rounded-xl border-gray-200 text-gray-700 hover:bg-gray-50 mb-3"
+                                    onClick={() => window.open(boarding.google_maps_url, '_blank')}
+                                >
+                                    <MapPin className="w-4 h-4 mr-2" /> View on Google Maps
+                                </Button>
+                            )}
 
                             {user?.role === 'OWNER' ? (
                                 <p className="text-gray-500 text-sm text-center font-medium mt-4">You cannot book or save properties as an owner.</p>

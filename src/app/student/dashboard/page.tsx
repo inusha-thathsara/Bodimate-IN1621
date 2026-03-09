@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Bookmark, ClipboardList, Clock, Home, MapPin, CheckCircle2 } from 'lucide-react'
-import { getRequestsByStudent, getSavedBoardingsByStudent, toggleSavedBoarding } from '@/lib/api'
+import { Bookmark, ClipboardList, Clock, Home, MapPin, CheckCircle2, Trash2 } from 'lucide-react'
+import { getRequestsByStudent, getSavedBoardingsByStudent, toggleSavedBoarding, deleteRequest } from '@/lib/api'
 import { useUserStore } from '@/store/useUserStore'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -43,6 +43,18 @@ export default function StudentDashboardPage() {
         } catch (error) {
             console.error('Error removing saved boarding:', error)
             alert('Failed to remove from saved places.')
+        }
+    }
+
+    async function handleDeleteRequest(requestId: string, e: React.MouseEvent) {
+        e.preventDefault() // prevent navigating to boarding detail page
+        if (!confirm('Are you sure you want to cancel this request?')) return
+        try {
+            await deleteRequest(requestId)
+            setRequests(requests.filter(r => r.id !== requestId))
+        } catch (error) {
+            console.error('Error deleting request:', error)
+            alert('Failed to delete request.')
         }
     }
 
@@ -222,6 +234,14 @@ export default function StudentDashboardPage() {
                                             {request.status === 'REJECTED' && (
                                                 <Badge className="bg-red-100 text-red-700 hover:bg-red-200 border-none font-bold px-3 py-1 shadow-none">Declined</Badge>
                                             )}
+                                            <button
+                                                onClick={(e) => handleDeleteRequest(request.id, e)}
+                                                className="mt-2 text-red-500 hover:text-red-700 flex items-center justify-center w-full gap-1 text-xs font-semibold"
+                                                title="Cancel Request"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                                Cancel
+                                            </button>
                                         </div>
                                     </div>
                                 </Link>

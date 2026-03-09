@@ -15,6 +15,8 @@ export interface BoardingCardProps {
     tags: string[]
     badgeText?: string
     badgeVariant?: 'default' | 'topRated' | 'femaleOnly'
+    numberOfBeds?: number
+    rentIncludesBills?: boolean
 }
 
 export function BoardingCard({
@@ -28,7 +30,9 @@ export function BoardingCard({
     imageUrl,
     tags,
     badgeText,
-    badgeVariant = 'default'
+    badgeVariant = 'default',
+    numberOfBeds,
+    rentIncludesBills
 }: BoardingCardProps) {
 
     const formattedPrice = new Intl.NumberFormat('si-LK').format(price)
@@ -78,6 +82,13 @@ export function BoardingCard({
                 <h3 className="text-xl font-bold text-[#0A1435] leading-tight mb-2 line-clamp-2">
                     {title}
                 </h3>
+
+                {/* Facilities Summary */}
+                <div className="flex items-center gap-2 mb-3 text-xs font-semibold text-gray-500">
+                    {numberOfBeds && <span>{numberOfBeds} {numberOfBeds === 1 ? 'Bed' : 'Beds'}</span>}
+                    {numberOfBeds && rentIncludesBills && <span className="text-gray-300">•</span>}
+                    {rentIncludesBills && <span className="text-green-600">Bills Included</span>}
+                </div>
 
                 {/* Rating */}
                 <div className="flex items-center gap-2 mb-4">

@@ -170,8 +170,8 @@ export default function DashboardPage() {
                             {boardings.map((boarding) => (
                                 <div key={boarding.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group">
                                     <div className="relative h-48 bg-gray-100">
-                                        {boarding.image_url ? (
-                                            <Image src={boarding.image_url} alt={boarding.title} fill className="object-cover" />
+                                        {boarding.image_urls?.[0] || boarding.image_url ? (
+                                            <Image src={boarding.image_urls?.[0] || boarding.image_url} alt={boarding.title} fill className="object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
                                         )}
@@ -204,6 +204,10 @@ export default function DashboardPage() {
                                             <Badge variant={boarding.is_available ? 'default' : 'secondary'} className={boarding.is_available ? 'bg-green-100 text-green-700 hover:bg-green-200 shadow-none' : ''}>
                                                 {boarding.is_available ? 'Active' : 'Draft'}
                                             </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-2 mb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                            {boarding.number_of_beds || 1} {boarding.number_of_beds === 1 ? 'Bed' : 'Beds'}
+                                            {boarding.rent_includes_bills && <span className="text-green-600 ml-2">Bills Inc.</span>}
                                         </div>
                                         <p className="text-sm text-gray-500 mb-4 line-clamp-1">{boarding.address}</p>
                                         <div className="mt-auto border-t pt-4">

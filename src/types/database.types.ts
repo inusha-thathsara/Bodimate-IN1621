@@ -16,6 +16,10 @@ export interface Database {
                     full_name: string | null
                     email: string
                     created_at: string
+                    phone_number: string | null
+                    gender: string | null
+                    university: string | null
+                    age: number | null
                 }
                 Insert: {
                     id: string
@@ -23,6 +27,10 @@ export interface Database {
                     full_name?: string | null
                     email: string
                     created_at?: string
+                    phone_number?: string | null
+                    gender?: string | null
+                    university?: string | null
+                    age?: number | null
                 }
                 Update: {
                     id?: string
@@ -30,6 +38,10 @@ export interface Database {
                     full_name?: string | null
                     email?: string
                     created_at?: string
+                    phone_number?: string | null
+                    gender?: string | null
+                    university?: string | null
+                    age?: number | null
                 }
                 Relationships: []
             }
@@ -47,6 +59,17 @@ export interface Database {
                     image_url: string | null
                     is_available: boolean
                     created_at: string
+                    rent_includes_bills: boolean
+                    number_of_beds: number
+                    google_maps_url: string | null
+                    distance_university: string | null
+                    distance_supermarket: string | null
+                    distance_town: string | null
+                    has_kitchen: boolean
+                    has_balcony: boolean
+                    has_laundry: boolean
+                    rules: string | null
+                    image_urls: string[] | null
                 }
                 Insert: {
                     id?: string
@@ -61,6 +84,17 @@ export interface Database {
                     image_url?: string | null
                     is_available?: boolean
                     created_at?: string
+                    rent_includes_bills?: boolean
+                    number_of_beds?: number
+                    google_maps_url?: string | null
+                    distance_university?: string | null
+                    distance_supermarket?: string | null
+                    distance_town?: string | null
+                    has_kitchen?: boolean
+                    has_balcony?: boolean
+                    has_laundry?: boolean
+                    rules?: string | null
+                    image_urls?: string[] | null
                 }
                 Update: {
                     id?: string
@@ -75,6 +109,17 @@ export interface Database {
                     image_url?: string | null
                     is_available?: boolean
                     created_at?: string
+                    rent_includes_bills?: boolean
+                    number_of_beds?: number
+                    google_maps_url?: string | null
+                    distance_university?: string | null
+                    distance_supermarket?: string | null
+                    distance_town?: string | null
+                    has_kitchen?: boolean
+                    has_balcony?: boolean
+                    has_laundry?: boolean
+                    rules?: string | null
+                    image_urls?: string[] | null
                 }
                 Relationships: [
                     {

@@ -169,6 +169,16 @@ export async function updateRequestStatus(id: string, status: 'PENDING' | 'ACCEP
     return data
 }
 
+export async function deleteRequest(id: string) {
+    const { error } = await supabase
+        .from('requests')
+        .delete()
+        .eq('id', id)
+
+    if (error) throw error
+    return true
+}
+
 // Saved Boardings API
 export async function toggleSavedBoarding(boardingId: string, studentId: string) {
     // First check if it exists
