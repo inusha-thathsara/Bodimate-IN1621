@@ -11,6 +11,7 @@ import { useUserStore } from '@/store/useUserStore'
 import { Loader2, UploadCloud, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 export function BoardingForm() {
     const router = useRouter()
@@ -28,6 +29,7 @@ export function BoardingForm() {
         has_laundry: false,
     })
     const [rentIncludesBills, setRentIncludesBills] = useState(false)
+    const [preferredGender, setPreferredGender] = useState('Any')
     const [images, setImages] = useState<File[]>([])
     const [imagePreviews, setImagePreviews] = useState<string[]>([])
 
@@ -107,8 +109,8 @@ export function BoardingForm() {
                 google_maps_url: formData.get('googleMapsUrl') as string || null,
                 distance_university: formData.get('distanceUniversity') as string,
                 distance_supermarket: formData.get('distanceSupermarket') as string || null,
-                distance_town: formData.get('distanceTown') as string || null,
                 rules: formData.get('rules') as string || null,
+                preferred_gender: preferredGender,
                 // Keep the first image as the primary image_url for backwards compatibility in lists
                 image_url: uploadedUrls.length > 0 ? uploadedUrls[0] : null,
                 image_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
@@ -283,6 +285,24 @@ export function BoardingForm() {
                                 className="w-full flex min-h-[80px] rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 placeholder="e.g. No smoking, visitors allowed until 9 PM..."
                             ></textarea>
+                        </div>
+
+                        <div className="space-y-4 pt-4 border-t border-gray-50">
+                            <Label className="text-gray-900 font-bold">Preferred Tenant Gender</Label>
+                            <RadioGroup value={preferredGender} onValueChange={setPreferredGender} className="flex space-x-6 bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-fit">
+                                <div className="flex items-center space-x-2.5">
+                                    <RadioGroupItem value="Any" id="gender-any" className="text-primary border-gray-300" />
+                                    <Label htmlFor="gender-any" className="cursor-pointer font-bold text-gray-700">Any</Label>
+                                </div>
+                                <div className="flex items-center space-x-2.5">
+                                    <RadioGroupItem value="Male" id="gender-male" className="text-primary border-gray-300" />
+                                    <Label htmlFor="gender-male" className="cursor-pointer font-bold text-gray-700">Boys Only</Label>
+                                </div>
+                                <div className="flex items-center space-x-2.5">
+                                    <RadioGroupItem value="Female" id="gender-female" className="text-primary border-gray-300" />
+                                    <Label htmlFor="gender-female" className="cursor-pointer font-bold text-gray-700">Girls Only</Label>
+                                </div>
+                            </RadioGroup>
                         </div>
                     </div>
                 </div>

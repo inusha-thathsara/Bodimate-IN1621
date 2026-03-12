@@ -70,6 +70,7 @@ export interface Database {
                     has_laundry: boolean
                     rules: string | null
                     image_urls: string[] | null
+                    preferred_gender: string | null
                 }
                 Insert: {
                     id?: string
@@ -95,6 +96,7 @@ export interface Database {
                     has_laundry?: boolean
                     rules?: string | null
                     image_urls?: string[] | null
+                    preferred_gender?: string | null
                 }
                 Update: {
                     id?: string
@@ -120,6 +122,7 @@ export interface Database {
                     has_laundry?: boolean
                     rules?: string | null
                     image_urls?: string[] | null
+                    preferred_gender?: string | null
                 }
                 Relationships: [
                     {

@@ -14,7 +14,7 @@ const supabase = createClient()
 export async function getBoardings() {
     const { data, error } = await supabase
         .from('boardings')
-        .select('*, users(full_name)')
+        .select('*, users(full_name), reviews(rating)')
         .order('created_at', { ascending: false })
 
     if (error) throw error

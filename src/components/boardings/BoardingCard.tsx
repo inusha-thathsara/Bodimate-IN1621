@@ -17,6 +17,7 @@ export interface BoardingCardProps {
     badgeVariant?: 'default' | 'topRated' | 'femaleOnly'
     numberOfBeds?: number
     rentIncludesBills?: boolean
+    priority?: boolean
 }
 
 export function BoardingCard({
@@ -32,7 +33,8 @@ export function BoardingCard({
     badgeText,
     badgeVariant = 'default',
     numberOfBeds,
-    rentIncludesBills
+    rentIncludesBills,
+    priority = false
 }: BoardingCardProps) {
 
     const formattedPrice = new Intl.NumberFormat('si-LK').format(price)
@@ -46,6 +48,8 @@ export function BoardingCard({
                         src={imageUrl}
                         alt={title}
                         fill
+                        priority={priority}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover"
                     />
                 ) : (
@@ -92,11 +96,23 @@ export function BoardingCard({
 
                 {/* Rating */}
                 <div className="flex items-center gap-2 mb-4">
-                    <div className="flex items-center gap-1 bg-[#FFF5EB] text-[#F2994A] px-1.5 py-0.5 rounded text-sm font-semibold border border-orange-100">
-                        <Star className="h-3 w-3 fill-current" />
-                        <span>{rating.toFixed(1)}</span>
-                    </div>
-                    <span className="text-sm text-gray-400 font-medium">({reviewsCount} reviews)</span>
+                    {reviewsCount > 0 ? (
+                        <>
+                            <div className="flex items-center gap-1 bg-[#FFF5EB] text-[#F2994A] px-1.5 py-0.5 rounded text-sm font-semibold border border-orange-100">
+                                <Star className="h-3 w-3 fill-current" />
+                                <span>{rating.toFixed(1)}</span>
+                            </div>
+                            <span className="text-sm text-gray-400 font-medium">({reviewsCount} reviews)</span>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex items-center gap-1 bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded text-sm font-semibold border border-gray-100">
+                                <Star className="h-3 w-3" />
+                                <span>New</span>
+                            </div>
+                            <span className="text-sm text-gray-400 font-medium whitespace-nowrap">No reviews yet</span>
+                        </>
+                    )}
                 </div>
 
                 {/* Tags */}

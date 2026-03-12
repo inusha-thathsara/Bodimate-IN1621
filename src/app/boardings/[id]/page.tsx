@@ -40,8 +40,8 @@ export default function BoardingDetailsPage() {
                 setBoarding(boardingData)
                 setReviews(reviewsData)
 
-                // Load user specific interactions if student
-                if (user?.id && user.role === 'STUDENT') {
+                // Load user specific interactions if student and if boarding exists
+                if (boardingData && user?.id && user?.role === 'STUDENT') {
                     const [savedResult, requestedResult] = await Promise.all([
                         checkIsSaved(boardingData.id, user.id),
                         checkHasRequested(boardingData.id, user.id)
@@ -52,6 +52,8 @@ export default function BoardingDetailsPage() {
 
             } catch (error) {
                 console.error('Error loading data:', error)
+                // Avoid infinite loading even on failure
+                setBoarding(null)
             } finally {
                 setIsLoading(false)
             }
@@ -131,16 +133,16 @@ export default function BoardingDetailsPage() {
                 {boarding.image_urls && boarding.image_urls.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 h-full w-full gap-1">
                         <div className="relative h-full col-span-1 md:col-span-2 row-span-2 cursor-pointer hover:opacity-95 transition-opacity">
-                            <Image src={boarding.image_urls[0]} alt="Primary View" fill className="object-cover" />
+                            <Image src={boarding.image_urls[0]} alt="Primary View" fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
                         </div>
                         {boarding.image_urls.slice(1, 5).map((url: string, index: number) => (
                             <div key={index} className="relative h-full hidden md:block cursor-pointer hover:opacity-95 transition-opacity">
-                                <Image src={url} alt={`Property view ${index + 2}`} fill className="object-cover" />
+                                <Image src={url} alt={`Property view ${index + 2}`} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover" />
                             </div>
                         ))}
                     </div>
                 ) : boarding.image_url ? (
-                    <Image src={boarding.image_url} alt={boarding.title} fill className="object-cover opacity-80" />
+                    <Image src={boarding.image_url} alt={boarding.title} fill priority sizes="100vw" className="object-cover opacity-80" />
                 ) : (
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0A1435]"></div>
                 )}
@@ -171,6 +173,11 @@ export default function BoardingDetailsPage() {
                             <div className="flex flex-wrap items-center gap-2 mb-4">
                                 <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-none px-3 font-semibold shadow-none">Verified</Badge>
                                 {!boarding.is_available && <Badge variant="destructive" className="px-3 shadow-none">Currently Unavailable</Badge>}
+                                {boarding.preferred_gender && boarding.preferred_gender !== 'Any' && (
+                                    <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-none px-3 font-semibold shadow-none">
+                                        {boarding.preferred_gender}s Only
+                                    </Badge>
+                                )}
                             </div>
                             <h1 className="text-3xl md:text-4xl font-extrabold text-[#0A1435] mb-4 leading-tight">{boarding.title}</h1>
                             <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm font-medium text-gray-500 mb-6">
