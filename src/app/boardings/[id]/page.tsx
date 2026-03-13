@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { MapPin, Star, Heart, Share2, ShieldCheck, Check } from 'lucide-react'
-import { getBoardingById, getReviewsByBoarding, createReview, createRequest, toggleSavedBoarding, checkIsSaved, checkHasRequested } from '@/lib/api'
+import { MapPin, Star, Heart, Share2, ShieldCheck, Check, ChevronLeft, ChevronRight, Expand, X } from 'lucide-react'
+import { getBoardingById, getReviewsByBoarding, createReview, createRequest, toggleSavedBoarding, checkIsSaved, getRequestForStudentBoarding } from '@/lib/api'
 import { useUserStore } from '@/store/useUserStore'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -26,8 +26,10 @@ export default function BoardingDetailsPage() {
     // Interaction state
     const [isSaved, setIsSaved] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
-    const [hasRequested, setHasRequested] = useState(false)
+    const [requestStatus, setRequestStatus] = useState<'PENDING' | 'ACCEPTED' | 'REJECTED' | null>(null)
     const [isRequesting, setIsRequesting] = useState(false)
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+    const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
 
     useEffect(() => {
         async function loadData() {
@@ -42,12 +44,12 @@ export default function BoardingDetailsPage() {
 
                 // Load user specific interactions if student and if boarding exists
                 if (boardingData && user?.id && user?.role === 'STUDENT') {
-                    const [savedResult, requestedResult] = await Promise.all([
+                    const [savedResult, requestResult] = await Promise.all([
                         checkIsSaved(boardingData.id, user.id),
-                        checkHasRequested(boardingData.id, user.id)
+                        getRequestForStudentBoarding(boardingData.id, user.id)
                     ])
                     setIsSaved(savedResult)
-                    setHasRequested(requestedResult)
+                    setRequestStatus(requestResult?.status || null)
                 }
 
             } catch (error) {
@@ -104,12 +106,12 @@ export default function BoardingDetailsPage() {
 
     async function handleRequestBook() {
         if (!user) return router.push('/login')
-        if (user.role !== 'STUDENT' || !boarding || hasRequested) return
+        if (user.role !== 'STUDENT' || !boarding || requestStatus) return
 
         setIsRequesting(true)
         try {
             await createRequest(boarding.id, user.id)
-            setHasRequested(true)
+            setRequestStatus('PENDING')
             alert('Request sent successfully! The owner will be notified.')
         } catch (error) {
             console.error('Error creating request:', error)
@@ -118,6 +120,46 @@ export default function BoardingDetailsPage() {
             setIsRequesting(false)
         }
     }
+
+    const galleryImages = boarding?.image_urls?.length > 0
+        ? boarding.image_urls
+        : (boarding?.image_url ? [boarding.image_url] : [])
+
+    const hasMultipleImages = galleryImages.length > 1
+
+    const showPrevImage = () => {
+        if (galleryImages.length === 0) return
+        setSelectedImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))
+    }
+
+    const showNextImage = () => {
+        if (galleryImages.length === 0) return
+        setSelectedImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))
+    }
+
+    useEffect(() => {
+        if (!isFullscreenOpen) return
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setIsFullscreenOpen(false)
+            }
+            if (event.key === 'ArrowLeft') {
+                showPrevImage()
+            }
+            if (event.key === 'ArrowRight') {
+                showNextImage()
+            }
+        }
+
+        window.addEventListener('keydown', onKeyDown)
+        document.body.style.overflow = 'hidden'
+
+        return () => {
+            window.removeEventListener('keydown', onKeyDown)
+            document.body.style.overflow = ''
+        }
+    }, [isFullscreenOpen, selectedImageIndex, galleryImages.length])
 
     if (isLoading) return <div className="max-w-7xl mx-auto px-4 py-12 text-center text-gray-500 font-medium">Loading property details...</div>
     if (!boarding) return <div className="max-w-7xl mx-auto px-4 py-12 text-center text-gray-500 font-medium">Property not found.</div>
@@ -130,16 +172,68 @@ export default function BoardingDetailsPage() {
         <div className="bg-gray-50 min-h-screen pb-24">
             {/* Top Gallery Header (Multiple Images) */}
             <div className="w-full h-[300px] md:h-[450px] relative bg-gray-900 overflow-hidden">
-                {boarding.image_urls && boarding.image_urls.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 h-full w-full gap-1">
-                        <div className="relative h-full col-span-1 md:col-span-2 row-span-2 cursor-pointer hover:opacity-95 transition-opacity">
-                            <Image src={boarding.image_urls[0]} alt="Primary View" fill priority sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
-                        </div>
-                        {boarding.image_urls.slice(1, 5).map((url: string, index: number) => (
-                            <div key={index} className="relative h-full hidden md:block cursor-pointer hover:opacity-95 transition-opacity">
-                                <Image src={url} alt={`Property view ${index + 2}`} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover" />
+                {galleryImages.length > 0 ? (
+                    <div className="relative h-full w-full">
+                        <button
+                            type="button"
+                            onClick={() => setIsFullscreenOpen(true)}
+                            className="absolute bottom-4 right-4 z-20 h-10 px-3 rounded-full bg-black/45 hover:bg-black/60 text-white flex items-center gap-2 text-sm font-semibold"
+                        >
+                            <Expand className="h-4 w-4" />
+                            Fullscreen
+                        </button>
+
+                        <Image
+                            src={galleryImages[selectedImageIndex]}
+                            alt={`Property view ${selectedImageIndex + 1}`}
+                            fill
+                            priority
+                            sizes="100vw"
+                            className="object-cover"
+                        />
+
+                        {hasMultipleImages && (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={showPrevImage}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 hover:bg-black/60 text-white flex items-center justify-center transition-colors"
+                                    aria-label="Previous image"
+                                >
+                                    <ChevronLeft className="h-5 w-5" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={showNextImage}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 hover:bg-black/60 text-white flex items-center justify-center transition-colors"
+                                    aria-label="Next image"
+                                >
+                                    <ChevronRight className="h-5 w-5" />
+                                </button>
+                            </>
+                        )}
+
+                        {hasMultipleImages && (
+                            <div className="absolute bottom-4 left-4 right-4 flex gap-2 overflow-x-auto pb-1">
+                                {galleryImages.map((url: string, index: number) => (
+                                    <button
+                                        key={index}
+                                        type="button"
+                                        onClick={() => setSelectedImageIndex(index)}
+                                        className={`relative h-14 w-20 rounded-lg overflow-hidden border-2 flex-shrink-0 ${selectedImageIndex === index ? 'border-white' : 'border-white/40'}`}
+                                        aria-label={`Show image ${index + 1}`}
+                                    >
+                                        <Image
+                                            src={url}
+                                            alt={`Thumbnail ${index + 1}`}
+                                            fill
+                                            sizes="80px"
+                                            className="object-cover"
+                                        />
+                                    </button>
+                                ))}
                             </div>
-                        ))}
+                        )}
                     </div>
                 ) : boarding.image_url ? (
                     <Image src={boarding.image_url} alt={boarding.title} fill priority sizes="100vw" className="object-cover opacity-80" />
@@ -240,6 +334,36 @@ export default function BoardingDetailsPage() {
                                 {boarding.description || 'No description provided.'}
                             </div>
                         </div>
+
+                        {/* Full Photo Gallery */}
+                        {galleryImages.length > 0 && (
+                            <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-bold text-[#0A1435]">Photo Gallery</h2>
+                                    <span className="text-sm font-semibold text-gray-500">{galleryImages.length} photos</span>
+                                </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                                    {galleryImages.map((url: string, index: number) => (
+                                        <button
+                                            key={`${url}-${index}`}
+                                            type="button"
+                                            onClick={() => setSelectedImageIndex(index)}
+                                            className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all ${selectedImageIndex === index ? 'border-primary shadow-sm' : 'border-gray-100 hover:border-gray-300'}`}
+                                            aria-label={`View property photo ${index + 1}`}
+                                        >
+                                            <Image
+                                                src={url}
+                                                alt={`Property photo ${index + 1}`}
+                                                fill
+                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                className="object-cover"
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Facilities */}
                         <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
@@ -347,6 +471,7 @@ export default function BoardingDetailsPage() {
                                                     {review.users?.full_name?.charAt(0) || 'S'}
                                                 </div>
                                                 <div>
+
                                                     <h4 className="font-bold text-[#0A1435] text-sm">{review.users?.full_name || 'Student'}</h4>
                                                     <div className="flex items-center gap-1">
                                                         {Array.from({ length: 5 }).map((_, i) => (
@@ -406,10 +531,26 @@ export default function BoardingDetailsPage() {
                                 <>
                                     <Button
                                         onClick={handleRequestBook}
-                                        disabled={!boarding.is_available || isRequesting || hasRequested}
-                                        className={`w-full h-14 text-lg font-bold rounded-2xl shadow-lg shadow-blue-900/20 mb-3 transition-all ${hasRequested ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-[#0A1435] hover:bg-[#0A1435]/90 text-white'}`}
+                                        disabled={!boarding.is_available || isRequesting || !!requestStatus}
+                                        className={`w-full h-14 text-lg font-bold rounded-2xl shadow-lg shadow-blue-900/20 mb-3 transition-all ${
+                                            requestStatus === 'ACCEPTED'
+                                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                : requestStatus === 'REJECTED'
+                                                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                                                    : requestStatus === 'PENDING'
+                                                        ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                                                        : 'bg-[#0A1435] hover:bg-[#0A1435]/90 text-white'
+                                            }`}
                                     >
-                                        {isRequesting ? 'Sending...' : hasRequested ? 'Request Sent' : 'Request to Book'}
+                                        {isRequesting
+                                            ? 'Sending...'
+                                            : requestStatus === 'ACCEPTED'
+                                                ? 'Request Accepted'
+                                                : requestStatus === 'REJECTED'
+                                                    ? 'Request Rejected'
+                                                    : requestStatus === 'PENDING'
+                                                        ? 'Request Pending'
+                                                        : 'Request to Book'}
                                     </Button>
                                     <Button
                                         variant={isSaved ? "default" : "outline"}
@@ -426,6 +567,89 @@ export default function BoardingDetailsPage() {
 
                 </div>
             </div>
+
+            {isFullscreenOpen && galleryImages.length > 0 && (
+                <div
+                    className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm"
+                    onClick={() => setIsFullscreenOpen(false)}
+                >
+                    <button
+                        type="button"
+                        onClick={(event) => {
+                            event.stopPropagation()
+                            setIsFullscreenOpen(false)
+                        }}
+                        className="absolute top-4 right-4 z-20 h-11 w-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+                        aria-label="Close fullscreen gallery"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+
+                    <div className="absolute inset-0 flex items-center justify-center px-6 py-16" onClick={(event) => event.stopPropagation()}>
+                        <div className="relative w-full max-w-6xl h-[70vh] sm:h-[75vh]">
+                            <Image
+                                src={galleryImages[selectedImageIndex]}
+                                alt={`Fullscreen property view ${selectedImageIndex + 1}`}
+                                fill
+                                sizes="100vw"
+                                className="object-contain"
+                            />
+                        </div>
+                    </div>
+
+                    {hasMultipleImages && (
+                        <>
+                            <button
+                                type="button"
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    showPrevImage()
+                                }}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+                                aria-label="Previous image"
+                            >
+                                <ChevronLeft className="h-6 w-6" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    showNextImage()
+                                }}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+                                aria-label="Next image"
+                            >
+                                <ChevronRight className="h-6 w-6" />
+                            </button>
+
+                            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 max-w-[90vw] overflow-x-auto">
+                                <div className="flex gap-2 bg-black/40 rounded-xl px-3 py-2">
+                                    {galleryImages.map((url: string, index: number) => (
+                                        <button
+                                            key={`fullscreen-${url}-${index}`}
+                                            type="button"
+                                            onClick={(event) => {
+                                                event.stopPropagation()
+                                                setSelectedImageIndex(index)
+                                            }}
+                                            className={`relative h-14 w-20 rounded-md overflow-hidden border-2 flex-shrink-0 ${selectedImageIndex === index ? 'border-white' : 'border-white/40'}`}
+                                            aria-label={`Select image ${index + 1}`}
+                                        >
+                                            <Image
+                                                src={url}
+                                                alt={`Fullscreen thumbnail ${index + 1}`}
+                                                fill
+                                                sizes="80px"
+                                                className="object-cover"
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

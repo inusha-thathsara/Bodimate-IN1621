@@ -215,6 +215,64 @@ export interface Database {
                     }
                 ]
             }
+            notifications: {
+                Row: {
+                    id: string
+                    recipient_id: string
+                    actor_id: string | null
+                    boarding_id: string | null
+                    type: 'REQUEST_CREATED' | 'REVIEW_CREATED' | 'REQUEST_STATUS_UPDATED' | 'LISTING_SAVED'
+                    title: string
+                    message: string
+                    is_read: boolean
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    recipient_id: string
+                    actor_id?: string | null
+                    boarding_id?: string | null
+                    type: 'REQUEST_CREATED' | 'REVIEW_CREATED' | 'REQUEST_STATUS_UPDATED' | 'LISTING_SAVED'
+                    title: string
+                    message: string
+                    is_read?: boolean
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    recipient_id?: string
+                    actor_id?: string | null
+                    boarding_id?: string | null
+                    type?: 'REQUEST_CREATED' | 'REVIEW_CREATED' | 'REQUEST_STATUS_UPDATED' | 'LISTING_SAVED'
+                    title?: string
+                    message?: string
+                    is_read?: boolean
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "notifications_recipient_id_fkey"
+                        columns: ["recipient_id"]
+                        isOneToOne: false
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "notifications_actor_id_fkey"
+                        columns: ["actor_id"]
+                        isOneToOne: false
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "notifications_boarding_id_fkey"
+                        columns: ["boarding_id"]
+                        isOneToOne: false
+                        referencedRelation: "boardings"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
             saved_boardings: {
                 Row: {
                     id: string

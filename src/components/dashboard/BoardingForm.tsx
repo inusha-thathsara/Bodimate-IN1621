@@ -68,6 +68,12 @@ export function BoardingForm() {
         setIsLoading(true)
         setError(null)
 
+        if (images.length !== 5) {
+            setError('Please upload exactly 5 images of the property before publishing.')
+            setIsLoading(false)
+            return
+        }
+
         const formData = new FormData(event.currentTarget)
 
         try {
@@ -213,18 +219,21 @@ export function BoardingForm() {
 
                 {/* Images */}
                 <div>
-                    <h3 className="text-lg font-bold text-[#0A1435] border-b pb-2 mb-4">Photos (Max 5)</h3>
+                    <h3 className="text-lg font-bold text-[#0A1435] border-b pb-2 mb-4">Photos (Required: 5)</h3>
                     <div className="space-y-4">
+                        <p className="text-sm text-gray-500 font-medium">Upload 5 clear photos so students can review the full property before requesting.</p>
                         <div className="flex items-center justify-center w-full">
                             <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                     <UploadCloud className="w-8 h-8 mb-3 text-gray-400" />
                                     <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Click to upload</span> images</p>
-                                    <p className="text-xs text-gray-500">PNG, JPG or WEBP (Max 5)</p>
+                                    <p className="text-xs text-gray-500">PNG, JPG or WEBP (Exactly 5)</p>
                                 </div>
                                 <input id="dropzone-file" type="file" className="hidden" multiple accept="image/*" onChange={handleImageChange} disabled={images.length >= 5} />
                             </label>
                         </div>
+
+                        <p className="text-xs font-semibold text-gray-500">Uploaded: {images.length}/5</p>
 
                         {imagePreviews.length > 0 && (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-4">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { BoardingCard } from '@/components/boardings/BoardingCard'
 import { getBoardings } from '@/lib/api'
 import { Input } from '@/components/ui/input'
@@ -14,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { ChevronDown, Search, MapPin, Grid, List as ListIcon, Filter } from 'lucide-react'
 
 export default function BoardingsFeed() {
+    const searchParams = useSearchParams()
     const [boardings, setBoardings] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
@@ -80,6 +82,31 @@ export default function BoardingsFeed() {
 
         fetchBoardings()
     }, [])
+
+    useEffect(() => {
+        const locationParam = searchParams.get('location')
+        const distanceParam = searchParams.get('distance')
+        const minPriceParam = searchParams.get('minPrice')
+        const maxPriceParam = searchParams.get('maxPrice')
+
+        if (locationParam && locations.includes(locationParam)) {
+            setSelectedLocation(locationParam)
+        }
+
+        if (distanceParam && distances.some((d) => d.value === distanceParam)) {
+            setSelectedDistance(distanceParam)
+        }
+
+        const parsedMin = minPriceParam ? Number(minPriceParam) : NaN
+        const parsedMax = maxPriceParam ? Number(maxPriceParam) : NaN
+        if (!Number.isNaN(parsedMin) && !Number.isNaN(parsedMax)) {
+            const min = Math.max(0, Math.min(parsedMin, 50000))
+            const max = Math.max(0, Math.min(parsedMax, 50000))
+            setPriceRange([Math.min(min, max), Math.max(min, max)])
+        }
+
+        setCurrentPage(1)
+    }, [searchParams])
 
     const toggleFacility = (facility: string) => {
         setSelectedFacilities(prev =>
@@ -327,7 +354,7 @@ export default function BoardingsFeed() {
                                             badgeText={badgeText}
                                             numberOfBeds={boarding.number_of_beds}
                                             rentIncludesBills={boarding.rent_includes_bills}
-                                            priority={index < 3} // NextJS: Give priority to top row images
+                                            priority={index === 0} // Only preload the absolute first card
                                         />
                                     </Link>
                                 )
