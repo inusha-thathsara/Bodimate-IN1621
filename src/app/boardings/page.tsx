@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { ChevronDown, Search, MapPin, Grid, List as ListIcon, Filter } from 'lucide-react'
 
-export default function BoardingsFeed() {
+function BoardingsFeedContent() {
     const searchParams = useSearchParams()
     const [boardings, setBoardings] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
@@ -399,5 +399,13 @@ export default function BoardingsFeed() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function BoardingsFeed() {
+    return (
+        <Suspense fallback={<div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full text-center text-gray-500 font-medium">Loading boardings...</div>}>
+            <BoardingsFeedContent />
+        </Suspense>
     )
 }
