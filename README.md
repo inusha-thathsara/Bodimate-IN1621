@@ -231,6 +231,12 @@ For bell notifications to work correctly:
 - Existing legacy listings created before that validation may still contain fewer images.
 - If you change remote image host configuration in `next.config.ts`, restart the dev server.
 
+## Documentation
+
+Full project documentation (design decisions, planning, and coursework notes) is available on Notion:
+
+[IN1621 Web Technologies – BodiMate Documentation](https://www.notion.so/IN1621-Web-Technologies-809fa20da46d832ca35581d892dc0a8b)
+
 ## License
 
 This repository includes a `LICENSE` file at the project root.
