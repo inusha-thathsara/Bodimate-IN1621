@@ -8,6 +8,7 @@ import { getBoardingById, getReviewsByBoarding, createReview, createRequest, tog
 import { useUserStore } from '@/store/useUserStore'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import QRCode from 'qrcode'
 
 export default function BoardingDetailsPage() {
     const params = useParams()
@@ -30,6 +31,11 @@ export default function BoardingDetailsPage() {
     const [isRequesting, setIsRequesting] = useState(false)
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
     const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
+    const [isShareOpen, setIsShareOpen] = useState(false)
+    const [shareQrDataUrl, setShareQrDataUrl] = useState('')
+    const [isGeneratingQr, setIsGeneratingQr] = useState(false)
+    const [shareError, setShareError] = useState<string | null>(null)
+    const [shareUrl, setShareUrl] = useState('')
 
     useEffect(() => {
         async function loadData() {
@@ -136,6 +142,54 @@ export default function BoardingDetailsPage() {
         if (galleryImages.length === 0) return
         setSelectedImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))
     }, [galleryImages.length])
+
+    useEffect(() => {
+        if (!boarding?.id || typeof window === 'undefined') return
+        setShareUrl(`${window.location.origin}/boardings/${boarding.id}`)
+    }, [boarding?.id])
+
+    const openShareModal = async () => {
+        if (!boarding) return
+
+        setIsShareOpen(true)
+        setShareError(null)
+
+        if (shareQrDataUrl) return
+        if (!shareUrl) {
+            setShareError('Unable to prepare the listing link right now.')
+            return
+        }
+
+        setIsGeneratingQr(true)
+        try {
+            const dataUrl = await QRCode.toDataURL(shareUrl, {
+                width: 720,
+                margin: 2,
+                errorCorrectionLevel: 'M',
+                color: {
+                    dark: '#0A1435',
+                    light: '#FFFFFF',
+                },
+            })
+            setShareQrDataUrl(dataUrl)
+        } catch (error) {
+            console.error('Error generating QR code:', error)
+            setShareError('Unable to generate the QR code right now.')
+        } finally {
+            setIsGeneratingQr(false)
+        }
+    }
+
+    const handleDownloadQr = () => {
+        if (!shareQrDataUrl || !boarding) return
+
+        const link = document.createElement('a')
+        link.href = shareQrDataUrl
+        link.download = `bodimate-${boarding.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-qr.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
 
     useEffect(() => {
         if (!isFullscreenOpen) return
@@ -247,9 +301,16 @@ export default function BoardingDetailsPage() {
                         &larr; Back
                     </Button>
                     <div className="flex gap-3">
-                        <Button variant="outline" size="icon" className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border-white/30 rounded-full h-10 w-10">
-                            <Share2 className="h-4 w-4" />
-                        </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border-white/30 rounded-full h-10 w-10"
+                                onClick={openShareModal}
+                                aria-label="Share listing"
+                            >
+                                <Share2 className="h-4 w-4" />
+                            </Button>
                         {user?.role !== 'OWNER' && (
                             <Button variant="outline" size="icon" className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border-white/30 rounded-full h-10 w-10">
                                 <Heart className="h-4 w-4" />
@@ -650,6 +711,79 @@ export default function BoardingDetailsPage() {
                             </div>
                         </>
                     )}
+                </div>
+            )}
+
+            {isShareOpen && (
+                <div
+                    className="fixed inset-0 z-[110] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4 py-8"
+                    onClick={() => setIsShareOpen(false)}
+                >
+                    <div
+                        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <div className="flex items-start justify-between gap-4 mb-5">
+                            <div>
+                                <h2 className="text-2xl font-extrabold text-[#0A1435]">Share listing</h2>
+                                <p className="text-sm text-gray-500 mt-1">Scan the QR code to open this property on any device.</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsShareOpen(false)}
+                                className="h-9 w-9 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center"
+                                aria-label="Close share dialog"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        {shareError ? (
+                            <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-medium text-red-600">
+                                {shareError}
+                            </div>
+                        ) : isGeneratingQr ? (
+                            <div className="flex h-72 items-center justify-center rounded-2xl border border-gray-100 bg-gray-50 text-gray-500 font-medium">
+                                Generating QR code...
+                            </div>
+                        ) : shareQrDataUrl ? (
+                            <div className="space-y-5">
+                                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                                    <Image
+                                        src={shareQrDataUrl}
+                                        alt={`QR code for ${boarding?.title || 'listing'}`}
+                                        width={720}
+                                        height={720}
+                                        unoptimized
+                                        className="mx-auto h-auto w-full max-w-sm rounded-xl bg-white p-3"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Listing Link</label>
+                                    <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 break-all">
+                                        {shareUrl}
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Button
+                                        type="button"
+                                        onClick={handleDownloadQr}
+                                        className="flex-1 h-12 rounded-xl bg-[#0A1435] hover:bg-[#0A1435]/90 font-bold"
+                                    >
+                                        Download QR as Image
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => navigator.clipboard.writeText(shareUrl)}
+                                        className="h-12 rounded-xl font-bold"
+                                    >
+                                        Copy Link
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : null}
+                    </div>
                 </div>
             )}
         </div>
