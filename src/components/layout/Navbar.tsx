@@ -393,7 +393,7 @@ export function Navbar() {
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Link href={user.role === 'OWNER' ? '/dashboard' : user.role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard'} className="cursor-pointer">
+                                        <Link href={user.role === 'OWNER' ? '/dashboard' : '/student/dashboard'} className="cursor-pointer">
                                             <LayoutDashboard className="mr-2 h-4 w-4" />
                                             <span>Dashboard</span>
                                         </Link>
