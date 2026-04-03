@@ -250,9 +250,11 @@ export default function BoardingDetailsPage() {
                         <Button variant="outline" size="icon" className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border-white/30 rounded-full h-10 w-10">
                             <Share2 className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border-white/30 rounded-full h-10 w-10">
-                            <Heart className="h-4 w-4" />
-                        </Button>
+                        {user?.role !== 'OWNER' && (
+                            <Button variant="outline" size="icon" className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border-white/30 rounded-full h-10 w-10">
+                                <Heart className="h-4 w-4" />
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>

@@ -12,7 +12,8 @@ import { Slider } from '@/components/ui/slider'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { ChevronDown, Search, MapPin, Grid, List as ListIcon, Filter } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { CheckCircle2, ChevronDown, Search, MapPin, Grid, List as ListIcon, Filter } from 'lucide-react'
 
 function BoardingsFeedContent() {
     const searchParams = useSearchParams()
@@ -20,7 +21,8 @@ function BoardingsFeedContent() {
     const [isLoading, setIsLoading] = useState(true)
 
     // Filter States
-    const [priceRange, setPriceRange] = useState([0, 50000])
+    const [priceBounds, setPriceBounds] = useState<[number, number]>([0, 0])
+    const [priceRange, setPriceRange] = useState<[number, number]>([0, 0])
     const [selectedLocation, setSelectedLocation] = useState('All')
     const [selectedDistance, setSelectedDistance] = useState('All')
     const [selectedFacilities, setSelectedFacilities] = useState<string[]>([])
@@ -47,6 +49,16 @@ function BoardingsFeedContent() {
         { label: 'Less than 5 km', value: '5' },
     ]
 
+    const sortOptions = [
+        { value: 'newest', label: 'Newest First', description: 'Recently posted listings first' },
+        { value: 'price_asc', label: 'Price: Low to High', description: 'Budget-friendly options first' },
+        { value: 'price_desc', label: 'Price: High to Low', description: 'Premium options first' },
+        { value: 'rating_desc', label: 'Top Rated', description: 'Highest average rating first' },
+        { value: 'reviews_desc', label: 'Most Reviewed', description: 'Listings with more feedback first' },
+    ] as const
+
+    const activeSort = sortOptions.find(option => option.value === sortBy) || sortOptions[0]
+
     // Helper to extract numbers from distance string (e.g. "500m" -> 0.5, "2km" -> 2, "10mins walk" -> 0.83)
     const parseDistance = (distStr: string | null | undefined): number | null => {
         if (!distStr) return null;
@@ -72,9 +84,26 @@ function BoardingsFeedContent() {
             try {
                 const data = await getBoardings()
                 setBoardings(data)
+
+                const prices = data
+                    .map((boarding: any) => Number(boarding.price))
+                    .filter((price: number) => Number.isFinite(price))
+
+                if (prices.length > 0) {
+                    const minPrice = Math.min(...prices)
+                    const maxPrice = Math.max(...prices)
+
+                    setPriceBounds([minPrice, maxPrice])
+                    setPriceRange([minPrice, maxPrice])
+                } else {
+                    setPriceBounds([0, 0])
+                    setPriceRange([0, 0])
+                }
             } catch (error) {
                 console.error('Failed to fetch boardings:', error)
                 setBoardings([])
+                setPriceBounds([0, 0])
+                setPriceRange([0, 0])
             } finally {
                 setIsLoading(false)
             }
@@ -84,6 +113,8 @@ function BoardingsFeedContent() {
     }, [])
 
     useEffect(() => {
+        const [boundMin, boundMax] = priceBounds
+
         const locationParam = searchParams.get('location')
         const distanceParam = searchParams.get('distance')
         const minPriceParam = searchParams.get('minPrice')
@@ -99,14 +130,22 @@ function BoardingsFeedContent() {
 
         const parsedMin = minPriceParam ? Number(minPriceParam) : NaN
         const parsedMax = maxPriceParam ? Number(maxPriceParam) : NaN
-        if (!Number.isNaN(parsedMin) && !Number.isNaN(parsedMax)) {
-            const min = Math.max(0, Math.min(parsedMin, 50000))
-            const max = Math.max(0, Math.min(parsedMax, 50000))
-            setPriceRange([Math.min(min, max), Math.max(min, max)])
+
+        let nextMin = boundMin
+        let nextMax = boundMax
+
+        if (!Number.isNaN(parsedMin)) {
+            nextMin = Math.max(boundMin, Math.min(parsedMin, boundMax))
         }
 
+        if (!Number.isNaN(parsedMax)) {
+            nextMax = Math.max(boundMin, Math.min(parsedMax, boundMax))
+        }
+
+        setPriceRange([Math.min(nextMin, nextMax), Math.max(nextMin, nextMax)])
+
         setCurrentPage(1)
-    }, [searchParams])
+    }, [searchParams, priceBounds])
 
     const toggleFacility = (facility: string) => {
         setSelectedFacilities(prev =>
@@ -150,11 +189,24 @@ function BoardingsFeedContent() {
     }).sort((a, b) => {
         if (sortBy === 'price_asc') return a.price - b.price
         if (sortBy === 'price_desc') return b.price - a.price
+
+        if (sortBy === 'rating_desc') {
+            const aCount = a.reviews?.length || 0
+            const bCount = b.reviews?.length || 0
+            const aRating = aCount > 0 ? a.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / aCount : 0
+            const bRating = bCount > 0 ? b.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / bCount : 0
+            return bRating - aRating
+        }
+
+        if (sortBy === 'reviews_desc') {
+            return (b.reviews?.length || 0) - (a.reviews?.length || 0)
+        }
+
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime() // newest
     })
 
     const clearFilters = () => {
-        setPriceRange([0, 50000])
+        setPriceRange([...priceBounds])
         setSelectedLocation('All')
         setSelectedDistance('All')
         setSelectedFacilities([])
@@ -219,10 +271,17 @@ function BoardingsFeedContent() {
                             <div className="px-2 mb-6">
                                 <Slider
                                     value={priceRange}
-                                    max={50000}
+                                    min={priceBounds[0]}
+                                    max={priceBounds[1]}
                                     step={100}
                                     className="w-full"
-                                    onValueChange={(val) => { setPriceRange(val); setCurrentPage(1); }}
+                                    onValueChange={(val) => {
+                                        const [min, max] = val
+                                        if (typeof min === 'number' && typeof max === 'number') {
+                                            setPriceRange([min, max])
+                                            setCurrentPage(1)
+                                        }
+                                    }}
                                 />
                             </div>
                             <div className="flex items-center gap-4">
@@ -295,20 +354,30 @@ function BoardingsFeedContent() {
                             Boarding Results <span className="text-base font-medium text-gray-400">({filteredBoardings.length} houses)</span>
                         </h1>
 
-                        <div className="flex items-center gap-4 text-sm font-medium text-gray-500">
-                            <span className="flex items-center gap-1 cursor-pointer">
-                                Sort: 
-                                <select 
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="bg-transparent font-bold text-[#0A1435] outline-none ml-1 cursor-pointer"
-                                >
-                                    <option value="newest">Newest First</option>
-                                    <option value="price_asc">Price: Low to High</option>
-                                    <option value="price_desc">Price: High to Low</option>
-                                </select>
-                            </span>
-                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm shadow-sm hover:bg-gray-50 transition-colors">
+                                    <span className="font-medium text-gray-500">Sort:</span>
+                                    <span className="font-bold text-[#0A1435]">{activeSort.label}</span>
+                                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-72">
+                                {sortOptions.map((option) => (
+                                    <DropdownMenuItem
+                                        key={option.value}
+                                        onClick={() => setSortBy(option.value)}
+                                        className="cursor-pointer py-2"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="font-semibold text-gray-900">{option.label}</span>
+                                            <span className="text-xs text-gray-500">{option.description}</span>
+                                        </div>
+                                        {sortBy === option.value && <CheckCircle2 className="ml-auto h-4 w-4 text-green-600" />}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
 
                     {/* Results Grid */}
@@ -354,7 +423,7 @@ function BoardingsFeedContent() {
                                             badgeText={badgeText}
                                             numberOfBeds={boarding.number_of_beds}
                                             rentIncludesBills={boarding.rent_includes_bills}
-                                            priority={index === 0} // Only preload the absolute first card
+                                            priority={index < 3} // Prioritize first row images to avoid LCP warning on whichever card becomes largest
                                         />
                                     </Link>
                                 )

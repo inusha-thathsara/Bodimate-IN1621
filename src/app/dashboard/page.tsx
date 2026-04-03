@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { PlusCircle, MoreVertical, Edit2, Trash2, Home, BarChart3, Users, Star, CheckCircle2, XCircle, Clock } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { PlusCircle, MoreVertical, Edit2, Trash2, Home, Users, Star, CheckCircle2, XCircle, Clock } from 'lucide-react'
 import { getBoardingsByOwner, deleteBoarding, getRequestsByOwner, getReviewsByOwner, updateBoarding, updateRequestStatus } from '@/lib/api'
 import { useUserStore } from '@/store/useUserStore'
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 
 export default function DashboardPage() {
+    const router = useRouter()
     const { user } = useUserStore()
     const [boardings, setBoardings] = useState<any[]>([])
     const [requests, setRequests] = useState<any[]>([])
@@ -189,14 +191,27 @@ export default function DashboardPage() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             {boardings.map((boarding) => (
-                                <div key={boarding.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group">
+                                <div
+                                    key={boarding.id}
+                                    className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group cursor-pointer"
+                                    onClick={() => router.push(`/boardings/${boarding.id}`)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault()
+                                            router.push(`/boardings/${boarding.id}`)
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label={`View listing ${boarding.title}`}
+                                >
                                     <div className="relative h-48 bg-gray-100">
                                         {boarding.image_urls?.[0] || boarding.image_url ? (
                                             <Image src={boarding.image_urls?.[0] || boarding.image_url} alt={boarding.title} fill className="object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
                                         )}
-                                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full shadow-sm">
+                                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full shadow-sm" onClick={(event) => event.stopPropagation()}>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">

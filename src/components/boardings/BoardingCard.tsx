@@ -1,7 +1,10 @@
+ 'use client'
+
 import Image from 'next/image'
 import { Heart, MapPin, Star } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useUserStore } from '@/store/useUserStore'
 
 export interface BoardingCardProps {
     id: string
@@ -36,6 +39,7 @@ export function BoardingCard({
     rentIncludesBills,
     priority = false
 }: BoardingCardProps) {
+    const { user } = useUserStore()
 
     const formattedPrice = new Intl.NumberFormat('si-LK').format(price)
 
@@ -68,9 +72,11 @@ export function BoardingCard({
                     )}
                     {!badgeText && <div />} {/* Spacer if no badge */}
 
-                    <button className="h-8 w-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition-colors shadow-sm">
-                        <Heart className="h-4 w-4" />
-                    </button>
+                    {user?.role !== 'OWNER' && (
+                        <button className="h-8 w-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition-colors shadow-sm">
+                            <Heart className="h-4 w-4" />
+                        </button>
+                    )}
                 </div>
             </div>
 
