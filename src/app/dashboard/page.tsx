@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PlusCircle, MoreVertical, Edit2, Trash2, Home, BarChart3, Users, Star, CheckCircle2, XCircle, Clock } from 'lucide-react'
-import { getBoardingsByOwner, deleteBoarding, getRequestsByOwner, getReviewsByOwner, updateRequestStatus } from '@/lib/api'
+import { getBoardingsByOwner, deleteBoarding, getRequestsByOwner, getReviewsByOwner, updateBoarding, updateRequestStatus } from '@/lib/api'
 import { useUserStore } from '@/store/useUserStore'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -16,6 +16,7 @@ export default function DashboardPage() {
     const [requests, setRequests] = useState<any[]>([])
     const [reviews, setReviews] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [updatingListingId, setUpdatingListingId] = useState<string | null>(null)
     const [activeTab, setActiveTab] = useState<'LISTINGS' | 'REQUESTS' | 'REVIEWS'>('LISTINGS')
 
     useEffect(() => {
@@ -58,6 +59,26 @@ export default function DashboardPage() {
         } catch (error) {
             console.error('Error deleting boarding:', error)
             alert('Failed to delete listing. Please try again.')
+        }
+    }
+
+    async function handleToggleAvailability(boardingId: string, currentStatus: boolean) {
+        const nextStatus = !currentStatus
+
+        setUpdatingListingId(boardingId)
+
+        try {
+            await updateBoarding(boardingId, { is_available: nextStatus })
+            setBoardings(prev => prev.map(boarding => (
+                boarding.id === boardingId
+                    ? { ...boarding, is_available: nextStatus }
+                    : boarding
+            )))
+        } catch (error) {
+            console.error('Error updating listing status:', error)
+            alert('Failed to update listing status. Please try again.')
+        } finally {
+            setUpdatingListingId(null)
         }
     }
 
@@ -189,6 +210,21 @@ export default function DashboardPage() {
                                                         </Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
+                                                        onClick={() => handleToggleAvailability(boarding.id, boarding.is_available)}
+                                                        disabled={updatingListingId === boarding.id}
+                                                        className="cursor-pointer font-medium"
+                                                    >
+                                                        {boarding.is_available ? (
+                                                            <>
+                                                                <XCircle className="mr-2 h-4 w-4" /> Mark Inactive
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <CheckCircle2 className="mr-2 h-4 w-4" /> Mark Active
+                                                            </>
+                                                        )}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
                                                         onClick={() => handleDelete(boarding.id)}
                                                         className="text-red-600 focus:text-red-700 cursor-pointer font-medium"
                                                     >
@@ -202,7 +238,7 @@ export default function DashboardPage() {
                                         <div className="flex justify-between items-start mb-2">
                                             <h3 className="font-bold text-lg text-[#0A1435] line-clamp-1">{boarding.title}</h3>
                                             <Badge variant={boarding.is_available ? 'default' : 'secondary'} className={boarding.is_available ? 'bg-green-100 text-green-700 hover:bg-green-200 shadow-none' : ''}>
-                                                {boarding.is_available ? 'Active' : 'Draft'}
+                                                {boarding.is_available ? 'Active' : 'Inactive'}
                                             </Badge>
                                         </div>
                                         <div className="flex items-center gap-2 mb-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
