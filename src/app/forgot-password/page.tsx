@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
     }
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-center p-4 bg-[#F6F8FD] py-12">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 bg-background py-12">
             <div className="w-full max-w-md">
                 <div className="flex justify-center mb-8">
                     <Link href="/" className="flex items-center gap-2">
@@ -50,32 +50,32 @@ export default function ForgotPasswordPage() {
                     </Link>
                 </div>
 
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                <div className="rounded-3xl border border-border bg-card p-8 shadow-sm shadow-black/5">
                     <div className="mb-8 text-center">
-                        <h1 className="text-2xl font-extrabold text-[#0A1435]">Reset your password</h1>
-                        <p className="text-sm text-gray-500 mt-2 font-medium">Enter your email and we&apos;ll send you a secure reset link.</p>
+                        <h1 className="text-2xl font-extrabold text-foreground">Reset your password</h1>
+                        <p className="mt-2 text-sm font-medium text-muted-foreground">Enter your email and we&apos;ll send you a secure reset link.</p>
                     </div>
 
                     {error && (
-                        <div className="mb-6 rounded-lg border border-red-100 bg-red-50 p-3 text-sm font-medium text-red-600 break-words">
+                        <div className="mb-6 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive break-words">
                             {error}
                         </div>
                     )}
 
                     {success ? (
                         <div className="space-y-6 text-center">
-                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-50 text-green-600">
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                                 <MailCheck className="h-7 w-7" />
                             </div>
-                            <p className="text-sm font-medium text-gray-600">{success}</p>
-                            <Button onClick={() => router.push('/login')} className="w-full h-12 rounded-xl bg-[#0A1435] hover:bg-[#0A1435]/90 font-bold">
+                            <p className="text-sm font-medium text-muted-foreground">{success}</p>
+                            <Button onClick={() => router.push('/login')} className="h-12 w-full rounded-xl font-bold">
                                 Back to login
                             </Button>
                         </div>
                     ) : (
                         <form onSubmit={onSubmit} className="space-y-6">
                             <div className="space-y-1.5">
-                                <Label htmlFor="email" className="text-gray-700 font-medium">Email address</Label>
+                                <Label htmlFor="email" className="font-medium text-foreground">Email address</Label>
                                 <Input
                                     id="email"
                                     name="email"
@@ -84,11 +84,11 @@ export default function ForgotPasswordPage() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="john@example.com"
                                     required
-                                    className="h-12 bg-gray-50 border-gray-200 focus-visible:ring-primary"
+                                    className="h-12 rounded-xl border-border bg-background/80 focus-visible:ring-primary"
                                 />
                             </div>
 
-                            <Button className="w-full h-12 text-base font-bold bg-[#0A1435] hover:bg-[#0A1435]/90 rounded-xl" type="submit" disabled={isLoading}>
+                            <Button className="h-12 w-full rounded-xl text-base font-bold" type="submit" disabled={isLoading}>
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Send reset link
                             </Button>

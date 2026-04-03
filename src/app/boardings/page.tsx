@@ -221,26 +221,26 @@ function BoardingsFeedContent() {
 
                 {/* Sidebar Filters */}
                 <div className="w-full lg:w-[280px] flex-shrink-0">
-                    <div className="bg-white rounded-[20px] p-6 shadow-sm border border-gray-100">
+                    <div className="bg-card text-card-foreground rounded-[20px] p-6 shadow-sm border border-border">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-gray-900">Filters</h2>
-                            <button onClick={clearFilters} className="text-sm font-semibold text-gray-900 hover:opacity-70">Clear All</button>
+                            <h2 className="text-xl font-bold text-foreground">Filters</h2>
+                            <button onClick={clearFilters} className="text-sm font-semibold text-foreground/80 hover:text-foreground">Clear All</button>
                         </div>
 
                         {/* Location Filter */}
                         <div className="mb-8">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">LOCATION</h3>
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">LOCATION</h3>
                             <div className="relative">
                                 <select 
                                     value={selectedLocation} 
                                     onChange={(e) => { setSelectedLocation(e.target.value); setCurrentPage(1); }}
-                                    className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 pr-10 font-medium outline-none"
+                                    className="w-full appearance-none bg-muted/40 border border-border text-foreground text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 pr-10 font-medium outline-none"
                                 >
                                     {locations.map(loc => (
                                         <option key={loc} value={loc}>{loc}</option>
                                     ))}
                                 </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
                                     <ChevronDown className="h-4 w-4" />
                                 </div>
                             </div>
@@ -248,18 +248,18 @@ function BoardingsFeedContent() {
 
                         {/* Distance Filter */}
                         <div className="mb-8">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">DISTANCE TO UNI</h3>
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">DISTANCE TO UNI</h3>
                             <div className="relative">
                                 <select 
                                     value={selectedDistance} 
                                     onChange={(e) => { setSelectedDistance(e.target.value); setCurrentPage(1); }}
-                                    className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 pr-10 font-medium outline-none"
+                                    className="w-full appearance-none bg-muted/40 border border-border text-foreground text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 pr-10 font-medium outline-none"
                                 >
                                     {distances.map(dist => (
                                         <option key={dist.value} value={dist.value}>{dist.label}</option>
                                     ))}
                                 </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
                                     <ChevronDown className="h-4 w-4" />
                                 </div>
                             </div>
@@ -267,7 +267,7 @@ function BoardingsFeedContent() {
 
                         {/* Price Range */}
                         <div className="mb-8">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">PRICE RANGE (LKR)</h3>
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">PRICE RANGE (LKR)</h3>
                             <div className="px-2 mb-6">
                                 <Slider
                                     value={priceRange}
@@ -285,20 +285,20 @@ function BoardingsFeedContent() {
                                 />
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="flex-1 bg-gray-50 border border-gray-100 rounded-lg p-3">
-                                    <label className="text-xs text-gray-500 font-medium block mb-1">Min</label>
-                                    <div className="text-sm font-bold text-gray-900">Rs {priceRange[0].toLocaleString()}</div>
+                                <div className="flex-1 bg-muted/40 border border-border rounded-lg p-3">
+                                    <label className="text-xs text-muted-foreground font-medium block mb-1">Min</label>
+                                    <div className="text-sm font-bold text-foreground">Rs {priceRange[0].toLocaleString()}</div>
                                 </div>
-                                <div className="flex-1 bg-gray-50 border border-gray-100 rounded-lg p-3">
-                                    <label className="text-xs text-gray-500 font-medium block mb-1">Max</label>
-                                    <div className="text-sm font-bold text-gray-900">Rs {priceRange[1].toLocaleString()}</div>
+                                <div className="flex-1 bg-muted/40 border border-border rounded-lg p-3">
+                                    <label className="text-xs text-muted-foreground font-medium block mb-1">Max</label>
+                                    <div className="text-sm font-bold text-foreground">Rs {priceRange[1].toLocaleString()}</div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Student Facilities */}
                         <div className="mb-8">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">STUDENT FACILITIES</h3>
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">STUDENT FACILITIES</h3>
                             <div className="space-y-4">
                                 {Object.keys(facilityMap).map((facility) => (
                                     <div key={facility} className="flex items-center space-x-3">
@@ -306,11 +306,11 @@ function BoardingsFeedContent() {
                                             id={`facility-${facility}`} 
                                             checked={selectedFacilities.includes(facility)}
                                             onCheckedChange={() => toggleFacility(facility)}
-                                            className="rounded border-gray-300 w-5 h-5" 
+                                            className="rounded border-border w-5 h-5" 
                                         />
                                         <label
                                             htmlFor={`facility-${facility}`}
-                                            className="text-sm font-medium text-gray-700 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                            className="text-sm font-medium text-foreground/85 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                                         >
                                             {facility}
                                         </label>
@@ -321,23 +321,23 @@ function BoardingsFeedContent() {
 
                         {/* Gender Toggle */}
                         <div className="mb-8">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">GENDER</h3>
-                            <div className="flex bg-gray-50 p-1 rounded-full border border-gray-100">
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">GENDER</h3>
+                            <div className="flex bg-muted/50 p-1 rounded-full border border-border">
                                 <button 
                                     onClick={() => { setSelectedGender('Male'); setCurrentPage(1); }}
-                                    className={`flex-1 text-sm font-bold py-2 rounded-full transition-colors ${selectedGender === 'Male' ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                                    className={`flex-1 text-sm font-bold py-2 rounded-full transition-colors ${selectedGender === 'Male' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
                                     Male
                                 </button>
                                 <button 
                                     onClick={() => { setSelectedGender('Female'); setCurrentPage(1); }}
-                                    className={`flex-1 text-sm font-bold py-2 rounded-full transition-colors ${selectedGender === 'Female' ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                                    className={`flex-1 text-sm font-bold py-2 rounded-full transition-colors ${selectedGender === 'Female' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
                                     Female
                                 </button>
                                 <button 
                                     onClick={() => { setSelectedGender('Any'); setCurrentPage(1); }}
-                                    className={`flex-1 text-sm font-bold py-2 rounded-full transition-colors ${selectedGender === 'Any' ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                                    className={`flex-1 text-sm font-bold py-2 rounded-full transition-colors ${selectedGender === 'Any' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
                                     Both
                                 </button>
@@ -350,16 +350,16 @@ function BoardingsFeedContent() {
                 <div className="flex-1">
                     {/* Top Bar */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                        <h1 className="text-3xl font-extrabold text-[#0A1435] flex items-center gap-3">
-                            Boarding Results <span className="text-base font-medium text-gray-400">({filteredBoardings.length} houses)</span>
+                        <h1 className="text-3xl font-extrabold text-foreground flex items-center gap-3">
+                            Boarding Results <span className="text-base font-medium text-muted-foreground">({filteredBoardings.length} houses)</span>
                         </h1>
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm shadow-sm hover:bg-gray-50 transition-colors">
-                                    <span className="font-medium text-gray-500">Sort:</span>
-                                    <span className="font-bold text-[#0A1435]">{activeSort.label}</span>
-                                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                                <button className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm shadow-sm hover:bg-accent transition-colors">
+                                    <span className="font-medium text-muted-foreground">Sort:</span>
+                                    <span className="font-bold text-foreground">{activeSort.label}</span>
+                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-72">
@@ -370,8 +370,8 @@ function BoardingsFeedContent() {
                                         className="cursor-pointer py-2"
                                     >
                                         <div className="flex flex-col">
-                                            <span className="font-semibold text-gray-900">{option.label}</span>
-                                            <span className="text-xs text-gray-500">{option.description}</span>
+                                            <span className="font-semibold text-foreground">{option.label}</span>
+                                            <span className="text-xs text-muted-foreground">{option.description}</span>
                                         </div>
                                         {sortBy === option.value && <CheckCircle2 className="ml-auto h-4 w-4 text-green-600" />}
                                     </DropdownMenuItem>
@@ -382,9 +382,9 @@ function BoardingsFeedContent() {
 
                     {/* Results Grid */}
                     {isLoading ? (
-                        <div className="py-20 text-center text-gray-400 font-medium">Loading boardings...</div>
+                        <div className="py-20 text-center text-muted-foreground font-medium">Loading boardings...</div>
                     ) : filteredBoardings.length === 0 ? (
-                        <div className="py-20 text-center text-gray-400 font-medium bg-white rounded-3xl border border-gray-100">
+                        <div className="py-20 text-center text-muted-foreground font-medium bg-card rounded-3xl border border-border">
                             No boardings match your filters.
                         </div>
                     ) : (
@@ -437,7 +437,7 @@ function BoardingsFeedContent() {
                             <button
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                 disabled={currentPage === 1}
-                                className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white shadow-sm font-medium"
+                                className="w-10 h-10 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-card shadow-sm font-medium"
                             >
                                 &lsaquo;
                             </button>
@@ -448,7 +448,7 @@ function BoardingsFeedContent() {
                                     onClick={() => setCurrentPage(i + 1)}
                                     className={`w-10 h-10 flex items-center justify-center rounded-full font-bold shadow-sm transition-colors ${currentPage === i + 1
                                         ? 'bg-primary text-white shadow-md'
-                                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                        : 'bg-card border border-border text-foreground/80 hover:bg-accent'
                                         }`}
                                 >
                                     {i + 1}
@@ -458,7 +458,7 @@ function BoardingsFeedContent() {
                             <button
                                 onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredBoardings.length / ITEMS_PER_PAGE), p + 1))}
                                 disabled={currentPage === Math.ceil(filteredBoardings.length / ITEMS_PER_PAGE)}
-                                className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white shadow-sm font-medium"
+                                className="w-10 h-10 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-card shadow-sm font-medium"
                             >
                                 &rsaquo;
                             </button>
@@ -473,7 +473,7 @@ function BoardingsFeedContent() {
 
 export default function BoardingsFeed() {
     return (
-        <Suspense fallback={<div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full text-center text-gray-500 font-medium">Loading boardings...</div>}>
+        <Suspense fallback={<div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full text-center text-muted-foreground font-medium">Loading boardings...</div>}>
             <BoardingsFeedContent />
         </Suspense>
     )

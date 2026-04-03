@@ -64,6 +64,8 @@ export default function ResetPasswordPage() {
                     router.push('/dashboard')
                 } else if (userData?.role === 'STUDENT') {
                     router.push('/student/dashboard')
+                } else if (userData?.role === 'ADMIN') {
+                    router.push('/admin/dashboard')
                 } else {
                     router.push('/')
                 }
@@ -79,7 +81,7 @@ export default function ResetPasswordPage() {
     }
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-center p-4 bg-[#F6F8FD] py-12">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 bg-background py-12">
             <div className="w-full max-w-md">
                 <div className="flex justify-center mb-8">
                     <Link href="/" className="flex items-center gap-2">
@@ -90,33 +92,33 @@ export default function ResetPasswordPage() {
                     </Link>
                 </div>
 
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                <div className="rounded-3xl border border-border bg-card p-8 shadow-sm shadow-black/5">
                     <div className="mb-8 text-center">
-                        <h1 className="text-2xl font-extrabold text-[#0A1435]">Create a new password</h1>
-                        <p className="text-sm text-gray-500 mt-2 font-medium">Choose a strong password for your account.</p>
+                        <h1 className="text-2xl font-extrabold text-foreground">Create a new password</h1>
+                        <p className="mt-2 text-sm font-medium text-muted-foreground">Choose a strong password for your account.</p>
                     </div>
 
                     {isCheckingSession ? (
-                        <div className="py-12 text-center text-gray-500 font-medium">Checking your reset link...</div>
+                        <div className="py-12 text-center font-medium text-muted-foreground">Checking your reset link...</div>
                     ) : success ? (
                         <div className="space-y-6 text-center">
-                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-50 text-green-600">
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                                 <CheckCircle2 className="h-7 w-7" />
                             </div>
-                            <p className="text-sm font-medium text-gray-600">Your password has been updated.</p>
+                            <p className="text-sm font-medium text-muted-foreground">Your password has been updated.</p>
                         </div>
                     ) : (
                         <form onSubmit={onSubmit} className="space-y-6">
                             {error && (
-                                <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-sm font-medium text-red-600 break-words">
+                                <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive break-words">
                                     {error}
                                 </div>
                             )}
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="password" className="text-gray-700 font-medium">New password</Label>
+                                <Label htmlFor="password" className="font-medium text-foreground">New password</Label>
                                 <div className="relative">
-                                    <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                    <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="password"
                                         name="password"
@@ -125,13 +127,13 @@ export default function ResetPasswordPage() {
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter a new password"
                                         required
-                                        className="h-12 bg-gray-50 border-gray-200 focus-visible:ring-primary pl-10"
+                                        className="h-12 rounded-xl border-border bg-background/80 pl-10 focus-visible:ring-primary"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirm new password</Label>
+                                <Label htmlFor="confirmPassword" className="font-medium text-foreground">Confirm new password</Label>
                                 <Input
                                     id="confirmPassword"
                                     name="confirmPassword"
@@ -140,11 +142,11 @@ export default function ResetPasswordPage() {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     placeholder="Repeat the new password"
                                     required
-                                    className="h-12 bg-gray-50 border-gray-200 focus-visible:ring-primary"
+                                    className="h-12 rounded-xl border-border bg-background/80 focus-visible:ring-primary"
                                 />
                             </div>
 
-                            <Button className="w-full h-12 text-base font-bold bg-[#0A1435] hover:bg-[#0A1435]/90 rounded-xl" type="submit" disabled={isLoading}>
+                            <Button className="h-12 w-full rounded-xl text-base font-bold" type="submit" disabled={isLoading}>
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Update password
                             </Button>
@@ -152,7 +154,7 @@ export default function ResetPasswordPage() {
                     )}
 
                     <div className="mt-8 text-center text-sm">
-                        <span className="text-gray-500">Need a fresh reset link? </span>
+                        <span className="text-muted-foreground">Need a fresh reset link? </span>
                         <Link href="/forgot-password" className="text-primary font-bold hover:underline">
                             Request one again
                         </Link>

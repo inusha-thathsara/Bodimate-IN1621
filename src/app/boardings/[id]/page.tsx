@@ -27,6 +27,7 @@ export default function BoardingDetailsPage() {
     // Interaction state
     const [isSaved, setIsSaved] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
+    const [saveError, setSaveError] = useState<string | null>(null)
     const [requestStatus, setRequestStatus] = useState<'PENDING' | 'ACCEPTED' | 'REJECTED' | null>(null)
     const [isRequesting, setIsRequesting] = useState(false)
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -97,14 +98,26 @@ export default function BoardingDetailsPage() {
 
     async function handleToggleSave() {
         if (!user) return router.push('/login')
-        if (user.role !== 'STUDENT' || !boarding) return
+        if (user.role !== 'STUDENT' || !boarding || isSaving) return
 
+        const previousSaved = isSaved
         setIsSaving(true)
+        setSaveError(null)
+        setIsSaved(!previousSaved)
+
         try {
-            const result = await toggleSavedBoarding(boarding.id, user.id)
+            const result = await Promise.race([
+                toggleSavedBoarding(boarding.id, user.id),
+                new Promise<never>((_, reject) => {
+                    window.setTimeout(() => reject(new Error('Favorite update timed out. Please try again.')), 10000)
+                }),
+            ])
+
             setIsSaved(result.action === 'saved')
         } catch (error) {
             console.error('Error toggling save:', error)
+            setIsSaved(previousSaved)
+            setSaveError(error instanceof Error ? error.message : 'Unable to update favorites. Please try again.')
         } finally {
             setIsSaving(false)
         }
@@ -215,15 +228,15 @@ export default function BoardingDetailsPage() {
         }
     }, [isFullscreenOpen, showPrevImage, showNextImage])
 
-    if (isLoading) return <div className="max-w-7xl mx-auto px-4 py-12 text-center text-gray-500 font-medium">Loading property details...</div>
-    if (!boarding) return <div className="max-w-7xl mx-auto px-4 py-12 text-center text-gray-500 font-medium">Property not found.</div>
+    if (isLoading) return <div className="max-w-7xl mx-auto px-4 py-12 text-center text-muted-foreground font-medium">Loading property details...</div>
+    if (!boarding) return <div className="max-w-7xl mx-auto px-4 py-12 text-center text-muted-foreground font-medium">Property not found.</div>
 
     const avgRating = reviews.length > 0
         ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
         : 0
 
     return (
-        <div className="bg-gray-50 min-h-screen pb-24">
+        <div className="bg-background min-h-screen pb-24">
             {/* Top Gallery Header (Multiple Images) */}
             <div className="w-full h-[300px] md:h-[450px] relative bg-gray-900 overflow-hidden">
                 {galleryImages.length > 0 ? (
@@ -312,8 +325,17 @@ export default function BoardingDetailsPage() {
                                 <Share2 className="h-4 w-4" />
                             </Button>
                         {user?.role !== 'OWNER' && (
-                            <Button variant="outline" size="icon" className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border-white/30 rounded-full h-10 w-10">
-                                <Heart className="h-4 w-4" />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className={`bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border-white/30 rounded-full h-10 w-10 ${isSaved ? 'bg-red-500/30 hover:bg-red-500/40 border-red-300/40' : ''}`}
+                                onClick={handleToggleSave}
+                                disabled={isSaving}
+                                aria-pressed={isSaved}
+                                aria-label={isSaved ? 'Remove from favorites' : 'Save to favorites'}
+                            >
+                                <Heart className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
                             </Button>
                         )}
                     </div>
@@ -326,7 +348,7 @@ export default function BoardingDetailsPage() {
                     {/* Main Content Column */}
                     <div className="flex-1 space-y-8">
                         {/* Header info card */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                        <div className="bg-card text-card-foreground rounded-3xl p-8 shadow-sm border border-border">
                             <div className="flex flex-wrap items-center gap-2 mb-4">
                                 <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-none px-3 font-semibold shadow-none">Verified</Badge>
                                 {!boarding.is_available && <Badge variant="destructive" className="px-3 shadow-none">Currently Unavailable</Badge>}
@@ -336,74 +358,74 @@ export default function BoardingDetailsPage() {
                                     </Badge>
                                 )}
                             </div>
-                            <h1 className="text-3xl md:text-4xl font-extrabold text-[#0A1435] mb-4 leading-tight">{boarding.title}</h1>
-                            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm font-medium text-gray-500 mb-6">
-                                <div className="flex items-center gap-1.5 text-gray-700">
+                            <h1 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4 leading-tight">{boarding.title}</h1>
+                            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm font-medium text-muted-foreground mb-6">
+                                <div className="flex items-center gap-1.5 text-foreground/85">
                                     <MapPin className="h-4 w-4 text-primary" />
                                     {boarding.address}
                                 </div>
                                 {boarding.number_of_beds && (
-                                    <div className="flex items-center gap-1.5 text-gray-700 sm:border-l sm:pl-6 border-gray-200">
+                                    <div className="flex items-center gap-1.5 text-foreground/85 sm:border-l sm:pl-6 border-border">
                                         <span className="font-bold">{boarding.number_of_beds}</span>
                                         {boarding.number_of_beds === 1 ? 'Bed' : 'Beds'}
                                     </div>
                                 )}
                                 {avgRating > 0 && (
-                                    <div className="flex items-center gap-1.5 sm:border-l sm:pl-6 border-gray-200">
+                                    <div className="flex items-center gap-1.5 sm:border-l sm:pl-6 border-border">
                                         <Star className="h-4 w-4 text-[#F2994A] fill-current" />
-                                        <span className="text-gray-900 font-bold">{avgRating.toFixed(1)}</span>
+                                        <span className="text-foreground font-bold">{avgRating.toFixed(1)}</span>
                                         <span>({reviews.length} reviews)</span>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="flex gap-4 pt-6 border-t border-gray-100">
+                            <div className="flex gap-4 pt-6 border-t border-border">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500">
+                                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground">
                                         {boarding.users?.full_name?.charAt(0) || 'O'}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-[#0A1435] text-sm">Listed by</h3>
-                                        <p className="text-gray-500 text-sm font-medium">{boarding.users?.full_name || 'Owner'}</p>
+                                        <h3 className="font-bold text-foreground text-sm">Listed by</h3>
+                                        <p className="text-muted-foreground text-sm font-medium">{boarding.users?.full_name || 'Owner'}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Distances */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-6">
+                        <div className="bg-card text-card-foreground rounded-3xl p-8 shadow-sm border border-border flex flex-col sm:flex-row gap-6">
                             <div className="flex-1">
-                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Distance to University</h3>
-                                <p className="text-xl font-bold text-[#0A1435]">{boarding.distance_university || 'Not specified'}</p>
+                                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Distance to University</h3>
+                                <p className="text-xl font-bold text-foreground">{boarding.distance_university || 'Not specified'}</p>
                             </div>
                             {boarding.distance_supermarket && (
-                                <div className="flex-1 sm:border-l sm:pl-6 border-gray-100">
-                                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">To Supermarket</h3>
-                                    <p className="text-xl font-bold text-[#0A1435]">{boarding.distance_supermarket}</p>
+                                <div className="flex-1 sm:border-l sm:pl-6 border-border">
+                                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">To Supermarket</h3>
+                                    <p className="text-xl font-bold text-foreground">{boarding.distance_supermarket}</p>
                                 </div>
                             )}
                             {boarding.distance_town && (
-                                <div className="flex-1 sm:border-l sm:pl-6 border-gray-100">
-                                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">To Town</h3>
-                                    <p className="text-xl font-bold text-[#0A1435]">{boarding.distance_town}</p>
+                                <div className="flex-1 sm:border-l sm:pl-6 border-border">
+                                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">To Town</h3>
+                                    <p className="text-xl font-bold text-foreground">{boarding.distance_town}</p>
                                 </div>
                             )}
                         </div>
 
                         {/* Description */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                            <h2 className="text-xl font-bold text-[#0A1435] mb-4">About this property</h2>
-                            <div className="text-gray-600 leading-relaxed whitespace-pre-wrap font-medium">
+                        <div className="bg-card text-card-foreground rounded-3xl p-8 shadow-sm border border-border">
+                            <h2 className="text-xl font-bold text-foreground mb-4">About this property</h2>
+                            <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
                                 {boarding.description || 'No description provided.'}
                             </div>
                         </div>
 
                         {/* Full Photo Gallery */}
                         {galleryImages.length > 0 && (
-                            <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                            <div className="bg-card text-card-foreground rounded-3xl p-8 shadow-sm border border-border">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-bold text-[#0A1435]">Photo Gallery</h2>
-                                    <span className="text-sm font-semibold text-gray-500">{galleryImages.length} photos</span>
+                                    <h2 className="text-xl font-bold text-foreground">Photo Gallery</h2>
+                                    <span className="text-sm font-semibold text-muted-foreground">{galleryImages.length} photos</span>
                                 </div>
 
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -412,7 +434,7 @@ export default function BoardingDetailsPage() {
                                             key={`${url}-${index}`}
                                             type="button"
                                             onClick={() => setSelectedImageIndex(index)}
-                                            className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all ${selectedImageIndex === index ? 'border-primary shadow-sm' : 'border-gray-100 hover:border-gray-300'}`}
+                                            className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all ${selectedImageIndex === index ? 'border-primary shadow-sm' : 'border-border hover:border-foreground/30'}`}
                                             aria-label={`View property photo ${index + 1}`}
                                         >
                                             <Image
@@ -429,29 +451,29 @@ export default function BoardingDetailsPage() {
                         )}
 
                         {/* Facilities */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                            <h2 className="text-xl font-bold text-[#0A1435] mb-6">Facilities & Amenities</h2>
+                        <div className="bg-card text-card-foreground rounded-3xl p-8 shadow-sm border border-border">
+                            <h2 className="text-xl font-bold text-foreground mb-6">Facilities & Amenities</h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
-                                <div className="flex items-center gap-3 font-medium text-gray-700">
+                                <div className="flex items-center gap-3 font-medium text-foreground/85">
                                     <div className={`flex items-center justify-center h-6 w-6 rounded-full ${boarding.has_wifi ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                                         {boarding.has_wifi ? <Check className="h-3 w-3" /> : <div className="h-1 w-1 rounded-full bg-current"></div>}
                                     </div>
                                     High-Speed WiFi
                                 </div>
-                                <div className="flex items-center gap-3 font-medium text-gray-700">
+                                <div className="flex items-center gap-3 font-medium text-foreground/85">
                                     <div className={`flex items-center justify-center h-6 w-6 rounded-full ${boarding.has_ac ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                                         {boarding.has_ac ? <Check className="h-3 w-3" /> : <div className="h-1 w-1 rounded-full bg-current"></div>}
                                     </div>
                                     Air Conditioning
                                 </div>
-                                <div className="flex items-center gap-3 font-medium text-gray-700">
+                                <div className="flex items-center gap-3 font-medium text-foreground/85">
                                     <div className={`flex items-center justify-center h-6 w-6 rounded-full ${boarding.attached_bathroom ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                                         {boarding.attached_bathroom ? <Check className="h-3 w-3" /> : <div className="h-1 w-1 rounded-full bg-current"></div>}
                                     </div>
                                     Attached Bathroom
                                 </div>
                                 {boarding.has_kitchen !== undefined && (
-                                    <div className="flex items-center gap-3 font-medium text-gray-700">
+                                    <div className="flex items-center gap-3 font-medium text-foreground/85">
                                         <div className={`flex items-center justify-center h-6 w-6 rounded-full ${boarding.has_kitchen ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                                             {boarding.has_kitchen ? <Check className="h-3 w-3" /> : <div className="h-1 w-1 rounded-full bg-current"></div>}
                                         </div>
@@ -459,7 +481,7 @@ export default function BoardingDetailsPage() {
                                     </div>
                                 )}
                                 {boarding.has_balcony !== undefined && (
-                                    <div className="flex items-center gap-3 font-medium text-gray-700">
+                                    <div className="flex items-center gap-3 font-medium text-foreground/85">
                                         <div className={`flex items-center justify-center h-6 w-6 rounded-full ${boarding.has_balcony ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                                             {boarding.has_balcony ? <Check className="h-3 w-3" /> : <div className="h-1 w-1 rounded-full bg-current"></div>}
                                         </div>
@@ -467,7 +489,7 @@ export default function BoardingDetailsPage() {
                                     </div>
                                 )}
                                 {boarding.has_laundry !== undefined && (
-                                    <div className="flex items-center gap-3 font-medium text-gray-700">
+                                    <div className="flex items-center gap-3 font-medium text-foreground/85">
                                         <div className={`flex items-center justify-center h-6 w-6 rounded-full ${boarding.has_laundry ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                                             {boarding.has_laundry ? <Check className="h-3 w-3" /> : <div className="h-1 w-1 rounded-full bg-current"></div>}
                                         </div>
@@ -479,26 +501,26 @@ export default function BoardingDetailsPage() {
 
                         {/* Rules */}
                         {boarding.rules && (
-                            <div className="bg-[#FFF5EB] rounded-3xl p-8 shadow-sm border border-orange-100">
-                                <h2 className="text-xl font-bold text-[#0A1435] mb-4">House Rules</h2>
-                                <div className="text-gray-700 font-medium whitespace-pre-wrap leading-relaxed">
+                            <div className="bg-card text-card-foreground rounded-3xl p-8 shadow-sm border border-border">
+                                <h2 className="text-xl font-bold text-foreground mb-4">House Rules</h2>
+                                <div className="text-muted-foreground font-medium whitespace-pre-wrap leading-relaxed">
                                     {boarding.rules}
                                 </div>
                             </div>
                         )}
 
                         {/* Reviews Section */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                            <h2 className="text-xl font-bold text-[#0A1435] mb-8 flex items-center gap-2">
+                        <div className="bg-card text-card-foreground rounded-3xl p-8 shadow-sm border border-border">
+                            <h2 className="text-xl font-bold text-foreground mb-8 flex items-center gap-2">
                                 <Star className="h-5 w-5 fill-[#F2994A] text-[#F2994A]" />
                                 {avgRating > 0 ? avgRating.toFixed(1) : 'No Ratings'}
-                                <span className="text-gray-400 font-medium ml-1">· {reviews.length} reviews</span>
+                                <span className="text-muted-foreground font-medium ml-1">· {reviews.length} reviews</span>
                             </h2>
 
                             {/* Add Review Form (Only for Students) */}
                             {user && user.role === 'STUDENT' && (
-                                <form onSubmit={handleReviewSubmit} className="bg-gray-50 rounded-2xl p-6 mb-8 border border-gray-100">
-                                    <h3 className="font-bold text-[#0A1435] mb-4">Leave a Review</h3>
+                                <form onSubmit={handleReviewSubmit} className="bg-muted/40 rounded-2xl p-6 mb-8 border border-border">
+                                    <h3 className="font-bold text-foreground mb-4">Leave a Review</h3>
                                     <div className="flex items-center gap-1 mb-4">
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <button
@@ -516,7 +538,7 @@ export default function BoardingDetailsPage() {
                                         value={comment}
                                         onChange={(e) => setComment(e.target.value)}
                                         placeholder="Share your experience..."
-                                        className="w-full h-24 rounded-xl border-gray-200 bg-white px-4 py-3 text-sm focus:ring-primary focus:border-primary mb-4 resize-none shadow-sm"
+                                        className="w-full h-24 rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground focus:ring-primary focus:border-primary mb-4 resize-none shadow-sm"
                                     ></textarea>
                                     <Button type="submit" disabled={isSubmittingReview} className="rounded-xl px-6 font-bold bg-[#0A1435]">
                                         {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
@@ -525,17 +547,17 @@ export default function BoardingDetailsPage() {
                             )}
 
                             <div className="space-y-6">
-                                {reviews.length === 0 && <p className="text-gray-500 italic">No reviews yet.</p>}
+                                {reviews.length === 0 && <p className="text-muted-foreground italic">No reviews yet.</p>}
                                 {reviews.map((review) => (
-                                    <div key={review.id} className="pb-6 border-b border-gray-50 last:border-0 last:pb-0">
+                                    <div key={review.id} className="pb-6 border-b border-border/50 last:border-0 last:pb-0">
                                         <div className="flex justify-between items-start mb-2">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-full bg-[#0A1435] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                                <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-sm">
                                                     {review.users?.full_name?.charAt(0) || 'S'}
                                                 </div>
                                                 <div>
 
-                                                    <h4 className="font-bold text-[#0A1435] text-sm">{review.users?.full_name || 'Student'}</h4>
+                                                    <h4 className="font-bold text-foreground text-sm">{review.users?.full_name || 'Student'}</h4>
                                                     <div className="flex items-center gap-1">
                                                         {Array.from({ length: 5 }).map((_, i) => (
                                                             <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'fill-[#F2994A] text-[#F2994A]' : 'text-gray-300'}`} />
@@ -543,12 +565,12 @@ export default function BoardingDetailsPage() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <span className="text-xs text-gray-400 font-medium">
+                                            <span className="text-xs text-muted-foreground font-medium">
                                                 {new Date(review.created_at).toLocaleDateString()}
                                             </span>
                                         </div>
                                         {review.comment && (
-                                            <p className="text-gray-600 font-medium text-sm mt-3 ml-13 leading-relaxed">
+                                            <p className="text-muted-foreground font-medium text-sm mt-3 ml-13 leading-relaxed">
                                                 {review.comment}
                                             </p>
                                         )}
@@ -560,10 +582,10 @@ export default function BoardingDetailsPage() {
 
                     {/* Right Sidebar Widget (Sticky Pricing Info) */}
                     <div className="w-full lg:w-[360px] flex-shrink-0">
-                        <div className="bg-white rounded-[24px] p-6 shadow-xl shadow-blue-900/5 border border-gray-100 lg:sticky lg:top-24">
-                            <div className="mb-6 border-b pb-6 border-gray-100">
-                                <span className="text-[32px] font-extrabold text-[#0A1435]">Rs {boarding.price.toLocaleString()}</span>
-                                <span className="text-gray-500 font-medium text-lg"> / month</span>
+                        <div className="bg-card text-card-foreground rounded-[24px] p-6 shadow-xl shadow-blue-900/5 border border-border lg:sticky lg:top-24">
+                            <div className="mb-6 border-b pb-6 border-border">
+                                <span className="text-[32px] font-extrabold text-foreground">Rs {boarding.price.toLocaleString()}</span>
+                                <span className="text-muted-foreground font-medium text-lg"> / month</span>
                                 {boarding.rent_includes_bills && (
                                     <div className="mt-3 flex items-center bg-green-50 text-green-700 px-3 py-1.5 w-fit rounded-full text-xs font-bold border border-green-200">
                                         <Check className="w-3.5 h-3.5 mr-1.5" /> Utilities Included (Water/Electricity)
@@ -571,17 +593,17 @@ export default function BoardingDetailsPage() {
                                 )}
                             </div>
 
-                            <div className="p-4 bg-gray-50 rounded-2xl mb-6 border border-gray-100">
+                            <div className="p-4 bg-muted/40 rounded-2xl mb-6 border border-border">
                                 <div className="flex items-start gap-3 text-sm">
                                     <ShieldCheck className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                                    <p className="text-gray-600 font-medium">Protected against fraud. Only pay when you visit the property and sign the agreement.</p>
+                                    <p className="text-muted-foreground font-medium">Protected against fraud. Only pay when you visit the property and sign the agreement.</p>
                                 </div>
                             </div>
 
                             {boarding.google_maps_url && (
                                 <Button
                                     variant="outline"
-                                    className="w-full h-12 text-sm font-bold rounded-xl border-gray-200 text-gray-700 hover:bg-gray-50 mb-3"
+                                    className="w-full h-12 text-sm font-bold rounded-xl border-border text-foreground hover:bg-accent mb-3"
                                     onClick={() => window.open(boarding.google_maps_url, '_blank')}
                                 >
                                     <MapPin className="w-4 h-4 mr-2" /> View on Google Maps
@@ -589,7 +611,7 @@ export default function BoardingDetailsPage() {
                             )}
 
                             {user?.role === 'OWNER' ? (
-                                <p className="text-gray-500 text-sm text-center font-medium mt-4">You cannot book or save properties as an owner.</p>
+                                <p className="text-muted-foreground text-sm text-center font-medium mt-4">You cannot book or save properties as an owner.</p>
                             ) : (
                                 <>
                                     <Button
@@ -621,8 +643,11 @@ export default function BoardingDetailsPage() {
                                         disabled={isSaving}
                                         className={`w-full h-14 text-base font-bold rounded-2xl border-2 transition-all ${isSaved ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700' : ''}`}
                                     >
-                                        {isSaving ? 'Updating...' : isSaved ? 'Saved to Favorites' : 'Save to Favorites'}
+                                        {isSaving ? (isSaved ? 'Removing...' : 'Updating...') : isSaved ? 'Saved to Favorites' : 'Save to Favorites'}
                                     </Button>
+                                    {saveError && (
+                                        <p className="mt-3 text-sm font-medium text-destructive">{saveError}</p>
+                                    )}
                                 </>
                             )}
                         </div>

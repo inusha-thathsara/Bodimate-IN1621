@@ -21,6 +21,8 @@ export default async function AuthLayout({
             redirect('/dashboard')
         } else if (userData?.role === 'STUDENT') {
             redirect('/student/dashboard')
+        } else if (userData?.role === 'ADMIN') {
+            redirect('/admin/dashboard')
         } else {
             redirect('/') // Fallback
         }

@@ -1,4 +1,4 @@
- 'use client'
+'use client'
 
 import Image from 'next/image'
 import { Heart, MapPin, Star } from 'lucide-react'
@@ -44,9 +44,9 @@ export function BoardingCard({
     const formattedPrice = new Intl.NumberFormat('si-LK').format(price)
 
     return (
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col h-full">
+        <div className="bg-card text-card-foreground rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-border flex flex-col h-full">
             {/* Image Container */}
-            <div className="relative h-[220px] w-full bg-gray-100">
+            <div className="relative h-[220px] w-full bg-muted">
                 {imageUrl ? (
                     <Image
                         src={imageUrl}
@@ -57,7 +57,7 @@ export function BoardingCard({
                         className="object-cover"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                         No Image
                     </div>
                 )}
@@ -83,20 +83,20 @@ export function BoardingCard({
             {/* Content */}
             <div className="p-5 flex flex-col flex-1">
                 {/* Location Info */}
-                <div className="flex items-center gap-1 text-[11px] font-bold tracking-wider text-gray-500 uppercase mb-2">
+                <div className="flex items-center gap-1 text-[11px] font-bold tracking-wider text-muted-foreground uppercase mb-2">
                     <MapPin className="h-3 w-3" />
                     <span>{location} ({distanceInfo})</span>
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-bold text-[#0A1435] leading-tight mb-2 line-clamp-2">
+                <h3 className="text-xl font-bold text-foreground leading-tight mb-2 line-clamp-2">
                     {title}
                 </h3>
 
                 {/* Facilities Summary */}
-                <div className="flex items-center gap-2 mb-3 text-xs font-semibold text-gray-500">
+                <div className="flex items-center gap-2 mb-3 text-xs font-semibold text-muted-foreground">
                     {numberOfBeds && <span>{numberOfBeds} {numberOfBeds === 1 ? 'Bed' : 'Beds'}</span>}
-                    {numberOfBeds && rentIncludesBills && <span className="text-gray-300">•</span>}
+                    {numberOfBeds && rentIncludesBills && <span className="text-border">•</span>}
                     {rentIncludesBills && <span className="text-green-600">Bills Included</span>}
                 </div>
 
@@ -108,15 +108,15 @@ export function BoardingCard({
                                 <Star className="h-3 w-3 fill-current" />
                                 <span>{rating.toFixed(1)}</span>
                             </div>
-                            <span className="text-sm text-gray-400 font-medium">({reviewsCount} reviews)</span>
+                            <span className="text-sm text-muted-foreground font-medium">({reviewsCount} reviews)</span>
                         </>
                     ) : (
                         <>
-                            <div className="flex items-center gap-1 bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded text-sm font-semibold border border-gray-100">
+                            <div className="flex items-center gap-1 bg-muted/50 text-muted-foreground px-1.5 py-0.5 rounded text-sm font-semibold border border-border">
                                 <Star className="h-3 w-3" />
                                 <span>New</span>
                             </div>
-                            <span className="text-sm text-gray-400 font-medium whitespace-nowrap">No reviews yet</span>
+                            <span className="text-sm text-muted-foreground font-medium whitespace-nowrap">No reviews yet</span>
                         </>
                     )}
                 </div>
@@ -124,18 +124,18 @@ export function BoardingCard({
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-8">
                     {tags.map((tag, i) => (
-                        <span key={i} className="bg-gray-100/70 text-gray-600 px-2.5 py-1 rounded-full text-[11px] font-bold border border-gray-200/50">
+                        <span key={i} className="bg-muted/60 text-muted-foreground px-2.5 py-1 rounded-full text-[11px] font-bold border border-border/70">
                             {tag}
                         </span>
                     ))}
                 </div>
 
                 {/* Bottom Section: Price & CTA */}
-                <div className="mt-auto flex items-end justify-between border-t border-gray-100 pt-5">
+                <div className="mt-auto flex items-end justify-between border-t border-border pt-5">
                     <div className="flex flex-col">
                         <div className="flex items-baseline gap-1">
-                            <span className="text-xl font-extrabold text-[#0A1435]">Rs {formattedPrice}</span>
-                            <span className="text-[13px] text-gray-400 font-medium">/ month</span>
+                            <span className="text-xl font-extrabold text-foreground">Rs {formattedPrice}</span>
+                            <span className="text-[13px] text-muted-foreground font-medium">/ month</span>
                         </div>
                     </div>
                     <Button className="rounded-xl px-4 py-2 bg-[#0A1435] hover:bg-opacity-90 text-white font-bold h-10 shadow-lg shadow-blue-900/10">

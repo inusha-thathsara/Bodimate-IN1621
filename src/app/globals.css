@@ -124,3 +124,66 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer base {
+  .dark .bg-white {
+    background-color: var(--card) !important;
+  }
+
+  .dark .bg-gray-50 {
+    background-color: var(--muted) !important;
+  }
+
+  .dark .bg-gray-100 {
+    background-color: var(--accent) !important;
+  }
+
+  .dark .bg-slate-50,
+  .dark .bg-slate-100 {
+    background-color: var(--muted) !important;
+  }
+
+  .dark .border-gray-50,
+  .dark .border-gray-100,
+  .dark .border-gray-200,
+  .dark .border-gray-300 {
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .dark .border-slate-100,
+  .dark .border-slate-200,
+  .dark .border-slate-300 {
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .dark .text-gray-900 {
+    color: var(--foreground) !important;
+  }
+
+  .dark .text-gray-700,
+  .dark .text-gray-600,
+  .dark .text-gray-500,
+  .dark .text-gray-400 {
+    color: var(--muted-foreground) !important;
+  }
+
+  .dark .text-slate-900 {
+    color: var(--foreground) !important;
+  }
+
+  .dark .text-slate-700,
+  .dark .text-slate-600,
+  .dark .text-slate-500,
+  .dark .text-slate-400,
+  .dark .text-slate-300 {
+    color: var(--muted-foreground) !important;
+  }
+
+  .dark .text-\[\#0A1435\] {
+    color: var(--foreground) !important;
+  }
+
+  .dark .bg-\[\#FFF5EB\] {
+    background-color: color-mix(in oklab, var(--card) 80%, #f2994a 20%) !important;
+  }
+}

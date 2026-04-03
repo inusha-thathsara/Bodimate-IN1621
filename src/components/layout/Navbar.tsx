@@ -11,6 +11,7 @@ import { Database } from '@/types/database.types'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
 type NotificationRow = Database['public']['Tables']['notifications']['Row']
 
@@ -187,8 +188,12 @@ export function Navbar() {
         }
     }
 
+    if (user?.role === 'ADMIN') {
+        return null
+    }
+
     return (
-        <nav className="border-b bg-white sticky top-0 z-50">
+        <nav className="border-b border-border bg-background/90 backdrop-blur sticky top-0 z-50">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-[72px] items-center">
                     {/* Logo Section */}
@@ -204,25 +209,25 @@ export function Navbar() {
                     {/* Center Search Pill */}
                     <form
                         onSubmit={handleSearchSubmit}
-                        className="hidden lg:flex items-center rounded-2xl border border-slate-200/80 bg-gradient-to-b from-white to-slate-50/70 p-1.5 shadow-[0_8px_20px_-12px_rgba(15,23,42,0.35)]"
+                        className="hidden lg:flex items-center rounded-2xl border border-border/80 bg-card/95 p-1.5 shadow-[0_8px_20px_-12px_rgba(15,23,42,0.45)] backdrop-blur"
                     >
-                        <div className="group flex items-center rounded-xl px-3 py-1.5 hover:bg-slate-100/70 transition-colors">
-                            <MapPin className="h-4 w-4 text-slate-400 mr-2.5" />
+                        <div className="group flex items-center rounded-xl px-3 py-1.5 hover:bg-accent/70 transition-colors">
+                            <MapPin className="h-4 w-4 text-muted-foreground mr-2.5" />
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-bold tracking-[0.14em] text-slate-500 uppercase">Location</span>
+                                <span className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">Location</span>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <button type="button" className="flex items-center gap-1 text-sm text-slate-900 font-semibold outline-none cursor-pointer">
+                                        <button type="button" className="flex items-center gap-1 text-sm text-foreground font-semibold outline-none cursor-pointer">
                                             <span>{getSelectedLabel(locationOptions, searchLocation)}</span>
-                                            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                                            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                                         </button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start" className="w-44 p-1.5 rounded-xl border-slate-200">
+                                    <DropdownMenuContent align="start" className="w-44 p-1.5 rounded-xl border-border">
                                         {locationOptions.map((option) => (
                                             <DropdownMenuItem
                                                 key={option.value}
                                                 onClick={() => setSearchLocation(option.value)}
-                                                className="rounded-lg font-medium text-slate-700 cursor-pointer"
+                                                className="rounded-lg font-medium text-foreground/90 cursor-pointer"
                                             >
                                                 <Check className={`mr-2 h-3.5 w-3.5 ${searchLocation === option.value ? 'opacity-100 text-primary' : 'opacity-0'}`} />
                                                 {option.label}
@@ -233,25 +238,25 @@ export function Navbar() {
                             </div>
                         </div>
 
-                        <div className="w-px h-9 bg-slate-200 mx-1"></div>
+                        <div className="w-px h-9 bg-border mx-1"></div>
 
-                        <div className="group flex items-center rounded-xl px-3 py-1.5 hover:bg-slate-100/70 transition-colors">
-                            <Wallet className="h-4 w-4 text-slate-400 mr-2.5" />
+                        <div className="group flex items-center rounded-xl px-3 py-1.5 hover:bg-accent/70 transition-colors">
+                            <Wallet className="h-4 w-4 text-muted-foreground mr-2.5" />
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-bold tracking-[0.14em] text-slate-500 uppercase">Price</span>
+                                <span className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">Price</span>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <button type="button" className="flex items-center gap-1 text-sm text-slate-900 font-semibold outline-none cursor-pointer">
+                                        <button type="button" className="flex items-center gap-1 text-sm text-foreground font-semibold outline-none cursor-pointer">
                                             <span>{getSelectedLabel(priceOptions, searchPriceRange)}</span>
-                                            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                                            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                                         </button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start" className="w-48 p-1.5 rounded-xl border-slate-200">
+                                    <DropdownMenuContent align="start" className="w-48 p-1.5 rounded-xl border-border">
                                         {priceOptions.map((option) => (
                                             <DropdownMenuItem
                                                 key={option.value}
                                                 onClick={() => setSearchPriceRange(option.value)}
-                                                className="rounded-lg font-medium text-slate-700 cursor-pointer"
+                                                className="rounded-lg font-medium text-foreground/90 cursor-pointer"
                                             >
                                                 <Check className={`mr-2 h-3.5 w-3.5 ${searchPriceRange === option.value ? 'opacity-100 text-primary' : 'opacity-0'}`} />
                                                 {option.label}
@@ -262,25 +267,25 @@ export function Navbar() {
                             </div>
                         </div>
 
-                        <div className="w-px h-9 bg-slate-200 mx-1"></div>
+                        <div className="w-px h-9 bg-border mx-1"></div>
 
-                        <div className="group flex items-center rounded-xl px-3 py-1.5 hover:bg-slate-100/70 transition-colors">
-                            <Ruler className="h-4 w-4 text-slate-400 mr-2.5" />
+                        <div className="group flex items-center rounded-xl px-3 py-1.5 hover:bg-accent/70 transition-colors">
+                            <Ruler className="h-4 w-4 text-muted-foreground mr-2.5" />
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-bold tracking-[0.14em] text-slate-500 uppercase">Distance</span>
+                                <span className="text-[10px] font-bold tracking-[0.14em] text-muted-foreground uppercase">Distance</span>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <button type="button" className="flex items-center gap-1 text-sm text-slate-900 font-semibold outline-none cursor-pointer">
+                                        <button type="button" className="flex items-center gap-1 text-sm text-foreground font-semibold outline-none cursor-pointer">
                                             <span>{getSelectedLabel(distanceOptions, searchDistance)}</span>
-                                            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                                            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                                         </button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start" className="w-44 p-1.5 rounded-xl border-slate-200">
+                                    <DropdownMenuContent align="start" className="w-44 p-1.5 rounded-xl border-border">
                                         {distanceOptions.map((option) => (
                                             <DropdownMenuItem
                                                 key={option.value}
                                                 onClick={() => setSearchDistance(option.value)}
-                                                className="rounded-lg font-medium text-slate-700 cursor-pointer"
+                                                className="rounded-lg font-medium text-foreground/90 cursor-pointer"
                                             >
                                                 <Check className={`mr-2 h-3.5 w-3.5 ${searchDistance === option.value ? 'opacity-100 text-primary' : 'opacity-0'}`} />
                                                 {option.label}
@@ -301,7 +306,8 @@ export function Navbar() {
                     </form>
 
                     {/* Right Section */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <ThemeToggle />
                         {user && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -314,17 +320,17 @@ export function Navbar() {
                                         )}
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-[360px] p-0 rounded-2xl overflow-hidden border border-gray-200">
-                                    <div className="px-4 py-3 border-b bg-slate-50/70 flex items-center justify-between">
+                                <DropdownMenuContent align="end" className="w-[360px] p-0 rounded-2xl overflow-hidden border border-border bg-card shadow-xl shadow-black/20">
+                                    <div className="px-4 py-3 border-b border-border bg-muted/40 flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-bold text-slate-900">Notifications</p>
-                                            <p className="text-xs text-slate-500">{unreadCount} unread</p>
+                                            <p className="text-sm font-bold text-foreground">Notifications</p>
+                                            <p className="text-xs text-muted-foreground">{unreadCount} unread</p>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={handleMarkAllRead}
                                             disabled={unreadCount === 0}
-                                            className="text-xs font-semibold text-primary disabled:text-slate-300"
+                                            className="text-xs font-semibold text-primary disabled:text-muted-foreground"
                                         >
                                             Mark all as read
                                         </button>
@@ -332,9 +338,9 @@ export function Navbar() {
 
                                     <div className="max-h-[360px] overflow-y-auto p-2">
                                         {isNotificationsLoading ? (
-                                            <div className="py-8 text-center text-sm text-slate-500">Loading notifications...</div>
+                                            <div className="py-8 text-center text-sm text-muted-foreground">Loading notifications...</div>
                                         ) : notifications.length === 0 ? (
-                                            <div className="py-10 text-center text-sm text-slate-500">No notifications yet.</div>
+                                            <div className="py-10 text-center text-sm text-muted-foreground">No notifications yet.</div>
                                         ) : (
                                             notifications.map((notification) => (
                                                 <button
@@ -342,8 +348,8 @@ export function Navbar() {
                                                     type="button"
                                                     onClick={() => handleNotificationClick(notification)}
                                                     className={`w-full text-left rounded-xl px-3 py-3 transition-colors border ${notification.is_read
-                                                        ? 'border-transparent hover:bg-slate-50'
-                                                        : 'border-blue-100 bg-blue-50/60 hover:bg-blue-50'
+                                                        ? 'border-transparent hover:bg-accent/70'
+                                                        : 'border-primary/20 bg-primary/10 hover:bg-primary/15'
                                                         }`}
                                                 >
                                                     <div className="flex items-start gap-3">
@@ -352,11 +358,11 @@ export function Navbar() {
                                                         </div>
                                                         <div className="min-w-0 flex-1">
                                                             <div className="flex items-center justify-between gap-2 mb-0.5">
-                                                                <p className="text-sm font-semibold text-slate-900 truncate">{notification.title}</p>
-                                                                {!notification.is_read && <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0"></span>}
+                                                                <p className="text-sm font-semibold text-foreground truncate">{notification.title}</p>
+                                                                {!notification.is_read && <span className="h-2 w-2 rounded-full bg-primary shrink-0"></span>}
                                                             </div>
-                                                            <p className="text-xs text-slate-600 leading-relaxed">{notification.message}</p>
-                                                            <p className="text-[11px] text-slate-400 mt-1.5">{getNotificationTimeLabel(notification.created_at)}</p>
+                                                            <p className="text-xs text-muted-foreground leading-relaxed">{notification.message}</p>
+                                                            <p className="text-[11px] text-muted-foreground mt-1.5">{getNotificationTimeLabel(notification.created_at)}</p>
                                                         </div>
                                                     </div>
                                                 </button>
@@ -387,7 +393,7 @@ export function Navbar() {
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Link href={user.role === 'OWNER' ? '/dashboard' : '/student/dashboard'} className="cursor-pointer">
+                                        <Link href={user.role === 'OWNER' ? '/dashboard' : user.role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard'} className="cursor-pointer">
                                             <LayoutDashboard className="mr-2 h-4 w-4" />
                                             <span>Dashboard</span>
                                         </Link>

@@ -39,9 +39,9 @@ export function DashboardSidebar() {
         <>
             {/* Desktop Sidebar */}
             <aside className="w-full lg:w-[260px] flex-shrink-0 hidden lg:block">
-                <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 sticky top-24">
+                <div className="bg-card text-card-foreground rounded-2xl p-4 shadow-sm border border-border sticky top-24">
                     <div className="mb-6 px-4">
-                        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Owner Portal</h2>
+                        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Owner Portal</h2>
                     </div>
                     <nav className="space-y-2">
                         {navItems.map((item) => {
@@ -52,7 +52,7 @@ export function DashboardSidebar() {
                                     href={item.href}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${active
                                             ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium'
+                                            : 'text-muted-foreground hover:bg-accent hover:text-foreground font-medium'
                                         }`}
                                 >
                                     <item.icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
@@ -62,8 +62,8 @@ export function DashboardSidebar() {
                         })}
                     </nav>
 
-                    <div className="mt-8 pt-8 border-t border-gray-100 px-4">
-                        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Account</h2>
+                    <div className="mt-8 pt-8 border-t border-border px-4">
+                        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">Account</h2>
                         <nav className="space-y-2">
                             {accountItems.map((item) => {
                                 const active = isActive(item.href)
@@ -73,7 +73,7 @@ export function DashboardSidebar() {
                                         href={item.href}
                                         className={`flex items-center gap-3 py-2 transition-all duration-200 ${active
                                                 ? 'text-primary font-bold'
-                                                : 'text-gray-500 hover:text-gray-900 font-medium'
+                                                : 'text-muted-foreground hover:text-foreground font-medium'
                                             }`}
                                     >
                                         <item.icon className="h-5 w-5" />
@@ -87,14 +87,14 @@ export function DashboardSidebar() {
             </aside>
 
             {/* Mobile Nav Header */}
-            <div className="lg:hidden w-full flex overflow-x-auto gap-2 pb-4 mb-4 border-b">
+            <div className="lg:hidden w-full flex overflow-x-auto gap-2 pb-4 mb-4 border-b border-border">
                 {navItems.map((item) => {
                     const active = isActive(item.href, item.exact)
                     return (
                         <Link key={item.href} href={item.href}>
                             <Button
                                 variant={active ? "secondary" : "outline"}
-                                className={active ? "bg-primary/10 text-primary border-none font-bold" : "text-gray-600 border-gray-200 font-medium"}
+                                className={active ? "bg-primary/10 text-primary border-none font-bold" : "text-muted-foreground border-border font-medium"}
                             >
                                 {item.label}
                             </Button>

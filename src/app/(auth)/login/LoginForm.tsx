@@ -64,6 +64,8 @@ export function LoginForm() {
                 router.push('/dashboard')
             } else if (userData?.role === 'STUDENT') {
                 router.push('/student/dashboard')
+            } else if (userData?.role === 'ADMIN') {
+                router.push('/admin/dashboard')
             } else {
                 router.push('/')
             }
@@ -78,14 +80,14 @@ export function LoginForm() {
     return (
         <form onSubmit={onSubmit} className="space-y-6">
             {error && (
-                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 font-medium break-words">
+                <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive break-words">
                     {error}
                 </div>
             )}
 
             <div className="space-y-4">
                 <div className="space-y-1.5">
-                    <Label htmlFor="email" className="text-gray-700 font-medium">Email address</Label>
+                    <Label htmlFor="email" className="font-medium text-foreground">Email address</Label>
                     <Input
                         id="email"
                         name="email"
@@ -94,12 +96,12 @@ export function LoginForm() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="john@example.com"
                         required
-                        className="h-12 bg-gray-50 border-gray-200 focus-visible:ring-primary"
+                        className="h-12 rounded-xl border-border bg-background/80 focus-visible:ring-primary"
                     />
                 </div>
                 <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                        <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
+                        <Label htmlFor="password" className="font-medium text-foreground">Password</Label>
                         <a href="/forgot-password" className="text-sm font-semibold text-primary hover:underline">Forgot password?</a>
                     </div>
                     <Input
@@ -109,7 +111,7 @@ export function LoginForm() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="h-12 bg-gray-50 border-gray-200 focus-visible:ring-primary"
+                        className="h-12 rounded-xl border-border bg-background/80 focus-visible:ring-primary"
                     />
                 </div>
 
@@ -118,18 +120,18 @@ export function LoginForm() {
                         id="remember"
                         checked={rememberMe}
                         onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                        className="data-[state=checked]:bg-[#0A1435] data-[state=checked]:border-[#0A1435]"
+                        className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
                     <Label
                         htmlFor="remember"
-                        className="text-sm font-medium leading-none cursor-pointer text-gray-700"
+                        className="cursor-pointer text-sm font-medium leading-none text-foreground"
                     >
                         Remember me
                     </Label>
                 </div>
             </div>
 
-            <Button className="w-full h-12 text-base font-bold bg-[#0A1435] hover:bg-[#0A1435]/90 rounded-xl" type="submit" disabled={isLoading}>
+            <Button className="h-12 w-full rounded-xl text-base font-bold" type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign in
             </Button>

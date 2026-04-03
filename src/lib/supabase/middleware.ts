@@ -28,7 +28,37 @@ export async function updateSession(request: NextRequest) {
     )
 
     // Refresh the session if necessary
-    await supabase.auth.getUser()
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+
+    const pathname = request.nextUrl.pathname
+    const isAdminRoute = pathname.startsWith('/admin')
+    const shouldBypassRoleGuard = pathname.startsWith('/auth/callback')
+
+    if (!shouldBypassRoleGuard && user) {
+        const { data: userData } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle()
+
+        const role = userData?.role
+
+        if (role === 'ADMIN' && !isAdminRoute) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/admin/dashboard'
+            url.search = ''
+            return NextResponse.redirect(url)
+        }
+
+        if (role !== 'ADMIN' && isAdminRoute) {
+            const url = request.nextUrl.clone()
+            url.pathname = role === 'OWNER' ? '/dashboard' : role === 'STUDENT' ? '/student/dashboard' : '/'
+            url.search = ''
+            return NextResponse.redirect(url)
+        }
+    }
 
     return supabaseResponse
 }

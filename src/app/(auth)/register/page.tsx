@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
     return (
-        <div className="flex-1 flex flex-col items-center justify-center p-4 bg-[#F6F8FD] py-12">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 bg-background py-12">
             <div className="w-full max-w-md">
                 <div className="flex justify-center mb-8">
                     <Link href="/" className="flex items-center gap-2">
@@ -22,10 +22,10 @@ export default function RegisterPage() {
                     </Link>
                 </div>
 
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                <div className="rounded-3xl border border-border bg-card p-8 shadow-sm shadow-black/5">
                     <div className="mb-8 text-center">
-                        <h1 className="text-2xl font-extrabold text-[#0A1435]">Create an account</h1>
-                        <p className="text-sm text-gray-500 mt-2 font-medium">Enter your details to get started.</p>
+                        <h1 className="text-2xl font-extrabold text-foreground">Create an account</h1>
+                        <p className="mt-2 text-sm font-medium text-muted-foreground">Enter your details to get started.</p>
                     </div>
 
                     <Suspense fallback={<div className="h-[400px] flex items-center justify-center">Loading form...</div>}>
@@ -33,7 +33,7 @@ export default function RegisterPage() {
                     </Suspense>
 
                     <div className="mt-8 text-center text-sm">
-                        <span className="text-gray-500">Already have an account? </span>
+                        <span className="text-muted-foreground">Already have an account? </span>
                         <Link href="/login" className="text-primary font-bold hover:underline">
                             Log in
                         </Link>

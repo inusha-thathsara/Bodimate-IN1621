@@ -12,7 +12,7 @@ export interface Database {
             users: {
                 Row: {
                     id: string
-                    role: 'STUDENT' | 'OWNER'
+                    role: 'STUDENT' | 'OWNER' | 'ADMIN'
                     full_name: string | null
                     email: string
                     created_at: string
@@ -23,7 +23,7 @@ export interface Database {
                 }
                 Insert: {
                     id: string
-                    role?: 'STUDENT' | 'OWNER'
+                    role?: 'STUDENT' | 'OWNER' | 'ADMIN'
                     full_name?: string | null
                     email: string
                     created_at?: string
@@ -34,7 +34,7 @@ export interface Database {
                 }
                 Update: {
                     id?: string
-                    role?: 'STUDENT' | 'OWNER'
+                    role?: 'STUDENT' | 'OWNER' | 'ADMIN'
                     full_name?: string | null
                     email?: string
                     created_at?: string
