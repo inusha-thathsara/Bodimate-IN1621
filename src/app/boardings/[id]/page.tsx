@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { MapPin, Star, Heart, Share2, ShieldCheck, Check, ChevronLeft, ChevronRight, Expand, X } from 'lucide-react'
@@ -127,15 +127,15 @@ export default function BoardingDetailsPage() {
 
     const hasMultipleImages = galleryImages.length > 1
 
-    const showPrevImage = () => {
+    const showPrevImage = useCallback(() => {
         if (galleryImages.length === 0) return
         setSelectedImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))
-    }
+    }, [galleryImages.length])
 
-    const showNextImage = () => {
+    const showNextImage = useCallback(() => {
         if (galleryImages.length === 0) return
         setSelectedImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))
-    }
+    }, [galleryImages.length])
 
     useEffect(() => {
         if (!isFullscreenOpen) return
@@ -159,7 +159,7 @@ export default function BoardingDetailsPage() {
             window.removeEventListener('keydown', onKeyDown)
             document.body.style.overflow = ''
         }
-    }, [isFullscreenOpen, selectedImageIndex, galleryImages.length])
+    }, [isFullscreenOpen, showPrevImage, showNextImage])
 
     if (isLoading) return <div className="max-w-7xl mx-auto px-4 py-12 text-center text-gray-500 font-medium">Loading property details...</div>
     if (!boarding) return <div className="max-w-7xl mx-auto px-4 py-12 text-center text-gray-500 font-medium">Property not found.</div>
@@ -189,7 +189,7 @@ export default function BoardingDetailsPage() {
                             fill
                             priority
                             sizes="100vw"
-                            className="object-cover"
+                            className="pointer-events-none select-none object-cover"
                         />
 
                         {hasMultipleImages && (
@@ -197,7 +197,7 @@ export default function BoardingDetailsPage() {
                                 <button
                                     type="button"
                                     onClick={showPrevImage}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 hover:bg-black/60 text-white flex items-center justify-center transition-colors"
+                                    className="absolute left-4 top-1/2 z-30 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 hover:bg-black/60 text-white flex items-center justify-center transition-colors pointer-events-auto"
                                     aria-label="Previous image"
                                 >
                                     <ChevronLeft className="h-5 w-5" />
@@ -205,7 +205,7 @@ export default function BoardingDetailsPage() {
                                 <button
                                     type="button"
                                     onClick={showNextImage}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 hover:bg-black/60 text-white flex items-center justify-center transition-colors"
+                                    className="absolute right-4 top-1/2 z-30 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 hover:bg-black/60 text-white flex items-center justify-center transition-colors pointer-events-auto"
                                     aria-label="Next image"
                                 >
                                     <ChevronRight className="h-5 w-5" />
@@ -240,7 +240,7 @@ export default function BoardingDetailsPage() {
                 ) : (
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0A1435]"></div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"></div>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"></div>
 
                 <div className="absolute top-4 sm:top-8 left-4 sm:left-8 right-4 sm:right-8 flex justify-between items-center z-10">
                     <Button variant="outline" className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border-white/30 rounded-full" onClick={() => router.back()}>
