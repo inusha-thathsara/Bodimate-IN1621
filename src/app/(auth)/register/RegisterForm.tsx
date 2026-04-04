@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -232,7 +233,7 @@ export function RegisterForm() {
                 <div className="flex items-start space-x-3 border-t border-border pt-4">
                     <Checkbox id="terms" checked={agreedToTerms} onCheckedChange={(c) => setAgreedToTerms(c as boolean)} className="mt-1 flex-shrink-0" />
                     <Label htmlFor="terms" className="inline-block cursor-pointer text-sm font-normal leading-relaxed text-muted-foreground">
-                        I agree to the <a href="#" className="font-bold text-primary hover:underline">Terms &amp; Conditions</a> and acknowledge that my data will be used in accordance with the <a href="#" className="font-bold text-primary hover:underline">Privacy Policy</a>.
+                        I agree to the <Link href="/terms-of-service" className="font-bold text-primary hover:underline">Terms &amp; Conditions</Link> and acknowledge that my data will be used in accordance with the <Link href="/privacy-policy" className="font-bold text-primary hover:underline">Privacy Policy</Link>.
                     </Label>
                 </div>
             </div>

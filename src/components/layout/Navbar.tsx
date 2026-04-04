@@ -301,7 +301,7 @@ export function Navbar() {
                             size="icon"
                             className="h-11 w-11 rounded-xl ml-1.5 bg-[#0A1435] hover:bg-[#0A1435]/90 shadow-[0_6px_14px_-8px_rgba(10,20,53,0.9)]"
                         >
-                            <Search className="h-4.5 w-4.5" />
+                            <Search className="h-4 w-4 text-white" />
                         </Button>
                     </form>
 

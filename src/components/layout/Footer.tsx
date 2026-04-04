@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export function Footer() {
     return (
         <footer className="bg-background border-t border-border py-12 mt-auto">
@@ -33,8 +35,8 @@ export function Footer() {
                         &copy; {new Date().getFullYear()} BodiMate Inc. All rights reserved.
                     </p>
                     <div className="flex gap-4 text-sm text-muted-foreground">
-                        <a href="#" className="hover:text-foreground">Privacy Policy</a>
-                        <a href="#" className="hover:text-foreground">Terms of Service</a>
+                        <Link href="/privacy-policy" className="hover:text-foreground">Privacy Policy</Link>
+                        <Link href="/terms-of-service" className="hover:text-foreground">Terms of Service</Link>
                     </div>
                 </div>
             </div>
