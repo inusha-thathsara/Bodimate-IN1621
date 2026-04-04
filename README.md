@@ -20,6 +20,7 @@ The application is built with Next.js App Router and Supabase, and currently sup
     - request accepted / rejected updates
 - Auth recovery flow with forgot-password and reset-password pages.
 - Theme switcher (light/dark) with persisted preference.
+- Built-in legal pages for Privacy Policy and Terms of Service.
 - Property creation with required 5-image upload flow.
 
 ## Tech Stack
@@ -238,6 +239,8 @@ For bell notifications to work correctly:
 - `/student/dashboard` student dashboard
 - `/admin/dashboard` admin analytics dashboard
 - `/profile` user profile settings
+- `/privacy-policy` legal privacy policy page
+- `/terms-of-service` legal terms page
 
 ## Role Access Rules
 
@@ -287,6 +290,10 @@ WHERE email = 'your-admin-email@example.com';
 Full project documentation (design decisions, planning, and coursework notes) is available on Notion:
 
 [IN1621 Web Technologies – BodiMate Documentation](https://www.notion.so/IN1621-Web-Technologies-809fa20da46d832ca35581d892dc0a8b)
+
+## Support Contact
+
+- Email: `inusha.thathsara@gmail.com`
 
 ## License
 
