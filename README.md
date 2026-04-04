@@ -290,6 +290,7 @@ WHERE email = 'your-admin-email@example.com';
 Full project documentation (design decisions, planning, and coursework notes) is available on Notion:
 
 [IN1621 Web Technologies – BodiMate Documentation](https://www.notion.so/IN1621-Web-Technologies-809fa20da46d832ca35581d892dc0a8b)
+
 [GitHub Link]: (https://github.com/inusha-thathsara/Bodimate-IN1621)
 
 ## Support Contact
