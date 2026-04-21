@@ -1,0 +1,78 @@
+name: Supabase Keep Alive (Auto Stop)
+
+on:
+  schedule:
+    - cron: "0 8 * * *"   # daily check at 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    env:
+      KEEPALIVE_URL: ${{ secrets.KEEPALIVE_URL }}
+      START_DATE: "2026-04-21"
+      END_DATE: "2026-07-21"
+      WORKFLOW_FILE: ".github/workflows/supabase-keepalive.yml"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Stop schedule after end date
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TODAY="$(date -u +%F)"
+          TODAY_EPOCH="$(date -u -d "$TODAY" +%s)"
+          END_EPOCH="$(date -u -d "$END_DATE" +%s)"
+
+          if [ "$TODAY_EPOCH" -le "$END_EPOCH" ]; then
+            echo "Still within active window."
+            exit 0
+          fi
+
+          echo "End date passed. Removing scheduled trigger from workflow."
+
+          # Remove the schedule block under 'on:' while keeping workflow_dispatch.
+          perl -0777 -i -pe '
+            s/on:\n\s+schedule:\n(?:\s+-\s+cron:\s+".*"\n)+\s+workflow_dispatch:/on:\n  workflow_dispatch:/s
+          ' "$WORKFLOW_FILE"
+
+          # Commit only if file changed
+          if git diff --quiet -- "$WORKFLOW_FILE"; then
+            echo "No workflow change needed."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$WORKFLOW_FILE"
+          git commit -m "chore: disable keepalive schedule after end date"
+          git push
+
+      - name: Ping only every 3 days within active window
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TODAY="$(date -u +%F)"
+          START_EPOCH="$(date -u -d "$START_DATE" +%s)"
+          END_EPOCH="$(date -u -d "$END_DATE" +%s)"
+          TODAY_EPOCH="$(date -u -d "$TODAY" +%s)"
+
+          if [ "$TODAY_EPOCH" -gt "$END_EPOCH" ]; then
+            echo "Past end date. Skip ping."
+            exit 0
+          fi
+
+          DAYS_SINCE_START=$(( (TODAY_EPOCH - START_EPOCH) / 86400 ))
+          if [ $(( DAYS_SINCE_START % 3 )) -ne 0 ]; then
+            echo "Not a 3-day boundary. Skip ping."
+            exit 0
+          fi
+
+          echo "Sending keep-alive request..."
+          curl -fsSL "$KEEPALIVE_URL" > /dev/null
